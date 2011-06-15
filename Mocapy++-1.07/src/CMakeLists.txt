@@ -60,6 +60,8 @@ vonmises/vonmisesdensities.cpp
 vonmises/vonmisesess.cpp
 kent/kentdensities.cpp
 kent/kentess.cpp
+mixed/mixeddensities.cpp
+mixed/mixedess.cpp
 )
 
 SET(Integrate_src

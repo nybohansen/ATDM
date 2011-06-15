@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>Documents/diku/ATDM/project/report/report.tex</string>
+	<string>report/report.tex</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -18,10 +18,66 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>200</integer>
+	<integer>242</integer>
 	<key>metaData</key>
 	<dict>
-		<key>Documents/diku/ATDM/project/report/bibliography.bib</key>
+		<key>Mocapy++-1.07/src/framework/dbn.h</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>36</integer>
+				<key>line</key>
+				<integer>66</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>24</integer>
+		</dict>
+		<key>Mocapy++-1.07/src/gaussian/gaussiandensities.cpp</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>54</integer>
+				<key>line</key>
+				<integer>222</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>202</integer>
+		</dict>
+		<key>Mocapy++-1.07/src/gaussian/gaussianess.cpp</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>48</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>1</integer>
+		</dict>
+		<key>Mocapy++-1.07/src/gaussian/gaussianess.h</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>7</integer>
+		</dict>
+		<key>report/bibliography.bib</key>
 		<dict>
 			<key>caret</key>
 			<dict>
@@ -35,14 +91,14 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>Documents/diku/ATDM/project/report/report.tex</key>
+		<key>report/report.tex</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>0</integer>
+				<integer>15</integer>
 				<key>line</key>
-				<integer>40</integer>
+				<integer>33</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -52,8 +108,12 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>Documents/diku/ATDM/project/report/report.tex</string>
-		<string>Documents/diku/ATDM/project/report/bibliography.bib</string>
+		<string>report/report.tex</string>
+		<string>Mocapy++-1.07/src/framework/dbn.h</string>
+		<string>Mocapy++-1.07/src/gaussian/gaussianess.cpp</string>
+		<string>Mocapy++-1.07/src/gaussian/gaussiandensities.cpp</string>
+		<string>Mocapy++-1.07/src/gaussian/gaussianess.h</string>
+		<string>report/bibliography.bib</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<false/>
@@ -66,7 +126,31 @@
 			<key>isExpanded</key>
 			<true/>
 			<key>subItems</key>
-			<dict/>
+			<dict>
+				<key>Mocapy++-1.07</key>
+				<dict>
+					<key>isExpanded</key>
+					<true/>
+					<key>subItems</key>
+					<dict>
+						<key>src</key>
+						<dict>
+							<key>isExpanded</key>
+							<true/>
+							<key>subItems</key>
+							<dict>
+								<key>gaussian</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
+							</dict>
+						</dict>
+					</dict>
+				</dict>
+			</dict>
 		</dict>
 	</dict>
 	<key>windowFrame</key>

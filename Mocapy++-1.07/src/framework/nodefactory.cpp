@@ -49,7 +49,27 @@ DiscreteNode* NodeFactory::new_discrete_node(uint node_size, const char* name, b
 	return n;
 }
 
-  GaussianNode* NodeFactory::new_gaussian_node(uint dimension, const char* name, bool init_random, bool shrinkage, MDArray<double> means, MDArray<double> covs, eCovType new_cov_type) {
+
+MixedNode* NodeFactory::new_mixed_node(uint node_size, const char* name, bool init_random, CPD new_cpd, Node* mixed_node, bool fixed) {
+	MixedNode* n = new MixedNode();
+	n->set_densities( MixedDensities(node_size, NULL, init_random ) );
+
+	assert(!mixed_node || new_cpd.empty());
+
+	if (mixed_node) {
+		CPD new_CPD = ((MixedNode*)mixed_node)->get_densities()->getCPD();
+		n->get_densities()->set_user_cpd(new_CPD);
+	}
+	if (!new_cpd.empty()) {
+		n->get_densities()->set_user_cpd(new_cpd);
+	}
+	n->fixed=fixed;
+	n->set_name(name);
+	return n;
+}
+
+
+GaussianNode* NodeFactory::new_gaussian_node(uint dimension, const char* name, bool init_random, bool shrinkage, MDArray<double> means, MDArray<double> covs, eCovType new_cov_type) {
 
   bool useShrinkage = shrinkage;
 
