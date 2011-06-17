@@ -23,11 +23,19 @@
 
 #include "../framework/essbase.h"
 
+// Expected Sufficient Statistics
+
 namespace mocapy {
 
 // Indices for the ess std::vector
-enum GAUSSIAN_ESS_INDEX {G_S, G_SY, G_SYTY, G_STYY, G_DATALENGTH, G_ESSSIZE};
-
+//M_D = Table of indicator values
+//M_V = Table of values of the
+enum MIXED_ESS_INDEX {M_D, M_V, M_DATALENGTH, M_ESSSIZE};
+//Enum used to define how the PTV is indexed
+//PV = Parent Value, Indicator = indicator, ENERGY = energy 
+enum PTV_INDEX {PV, INDICATOR, ENERGY};
+enum M_V_INDEX {SUM, SUM_SQUARED};
+enum M_D_INDEX {DISCRETE_TYPE, CONTINUOUS_TYPE};
 
 class MixedESS: public ESSBase {
 public:

@@ -77,6 +77,14 @@ private:
 	Prior* prior;
 	bool init_random;
 
+    // MDArray<double> user_means;
+    // MDArray<double> user_variance;
+	MDArray<double> means;
+    MDArray<double> variance;
+    
+    uint parent_size;
+	MDArray<double> CPD_Discrete;
+ 
 	// CPDs
 	CPD cpd;
 	CPD user_cpd;
@@ -90,6 +98,12 @@ void MixedDensities::serialize(Archive & ar, const unsigned int version) {
     ar & boost::serialization::base_object<DensitiesBase>(*this);
     ar & prior;
     ar & init_random;
+
+    // ar & user_means;
+    // ar & user_variance;
+    ar & means;                
+    ar & variance;
+
     ar & cpd;
     ar & user_cpd;
     ar & cum_cpd;

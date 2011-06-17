@@ -27,22 +27,32 @@ namespace mocapy {
 
 // Initializes the ESS arrays.
 void MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node_size) {
-	vector<uint> shape = vec_conc(parent_sizes, node_size);
+    // cout << "MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node_size)" << endl;
+    cout << "Parent size = " << parent_sizes << " output_dim = " << output_dim << " Node size = " << node_size << endl;
 
-	// Discrete ESS only has one MDArray
-	ess_shape.resize(1);
-	ess_shape[0].set_shape(shape);
-	ess_size = 1;
+	vector<uint> shape = vec_conc(parent_sizes, node_size);
+	
+	ess_shape.resize(M_ESSSIZE);
+    //M_D = indicator based on value
+    ess_shape[M_D].set_shape(shape);
+    //M_V = Energy, E and E^2 based on value
+    ess_shape[M_V].set_shape(shape);
+          
+	ess_size = M_ESSSIZE;
 	clear();
 }
 
 // Add another sample to the ESS
 void MixedESS::add_ptv(vector<double> ptv) {
-	vector<uint> int_indx;
-	toint(ptv, int_indx);
-	assert(!ess_shape.empty());
 
-	ess[0][int_indx]++;
+    //Update the indicator table    
+    ess[M_D].get_view( (uint)ptv[PV] )[ (uint) ptv[INDICATOR] ]++;
+    if(ptv[INDICATOR]){
+        //Update the energy table
+        ess[M_V].get_view( (uint)ptv[PV] )[ SUM ] += ptv[ENERGY];        
+        ess[M_V].get_view( (uint)ptv[PV] )[ SUM_SQUARED ] += pow(ptv[ENERGY],2);
+    }    
+
 }
 
 }

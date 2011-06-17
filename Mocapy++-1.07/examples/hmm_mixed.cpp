@@ -18,11 +18,11 @@ int main(void) {
 	DBN dbn;
 
 	// Nodes in slice 1
-	Node* h1 = NodeFactory::new_mixed_node(5, "h1");
+	Node* h1 = NodeFactory::new_discrete_node(5, "h1");
 	Node* o1 = NodeFactory::new_mixed_node(2, "o1");
 
 	// Nodes in slice 2
-	Node* h2 = NodeFactory::new_mixed_node(5, "h2");
+	Node* h2 = NodeFactory::new_discrete_node(5, "h2");
 
 	// Set architecture
 	dbn.set_slices(vec(h1, o1), vec(h2, o1));
@@ -35,16 +35,21 @@ int main(void) {
 	GibbsRandom mcmc = GibbsRandom(&dbn);
 
 	EMEngine em = EMEngine(&dbn, &mcmc);
-	em.load_mismask("data/mismask.dat");
-	em.load_weights("data/weights.dat");
-	em.load_sequences("data/traindata.dat");
+
+    //Test data for mixed
+    em.load_mismask("data/energy_CO_test.mismask");
+    em.load_sequences("data/energy_CO_test.data");
+
+    // em.load_mismask("data/mismask.dat");
+    // em.load_weights("data/weights.dat");
+    // em.load_sequences("data/traindata.dat");
 
 	cout << "Starting EM loop" << endl;
 	for (uint i=0; i<100; i++) {
 		em.do_E_step(20, 10);
 		double ll = em.get_loglik();
 		cout << "LL= " << ll << endl;
-		em.do_M_step();
+        em.do_M_step();
 	}
 
 	cout << "h1: " << *h1 << endl;
