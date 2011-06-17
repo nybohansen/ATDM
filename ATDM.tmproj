@@ -48,20 +48,13 @@
 					<true/>
 					<key>subItems</key>
 					<dict>
-						<key>examples</key>
-						<dict>
-							<key>isExpanded</key>
-							<true/>
-							<key>subItems</key>
-							<dict/>
-						</dict>
 						<key>src</key>
 						<dict>
 							<key>isExpanded</key>
 							<true/>
 							<key>subItems</key>
 							<dict>
-								<key>gaussian</key>
+								<key>kent</key>
 								<dict>
 									<key>isExpanded</key>
 									<true/>
@@ -69,6 +62,13 @@
 									<dict/>
 								</dict>
 								<key>mixed</key>
+								<dict>
+									<key>isExpanded</key>
+									<true/>
+									<key>subItems</key>
+									<dict/>
+								</dict>
+								<key>multimixed</key>
 								<dict>
 									<key>isExpanded</key>
 									<true/>

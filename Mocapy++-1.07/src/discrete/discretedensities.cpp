@@ -117,7 +117,6 @@ void DiscreteDensities::estimate(vector<MDArray<double> > & ess) {
 	if (prior) {
 		prior->apply_prior(ess.front());
 	}
-
 	set_cpd(ess.front());
 }
 

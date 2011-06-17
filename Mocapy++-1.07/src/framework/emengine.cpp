@@ -182,8 +182,8 @@ void EMEngine::do_E_step(uint mcmc_steps, uint burn_in_steps, bool init_random) 
   void EMEngine::verifyData() {
     // Check that each sequence has a datapoint for each node in a slice
     if (seq_list.empty()) {
-      cout << "No data has been loaded" << endl;
-      exit(1);
+        cout << "No data has been loaded" << endl;
+        exit(1);
     }
 
     if (mismask_list.empty()) {
@@ -192,37 +192,37 @@ void EMEngine::do_E_step(uint mcmc_steps, uint burn_in_steps, bool init_random) 
     }
     
     for (uint i=0; i<seq_list.size(); i++) {
-      Sequence* seq = seq_list[i];
-      vector<uint> shape = seq->get_shape();
-      assert(shape.size() == 2);
+        Sequence* seq = seq_list[i];
+        vector<uint> shape = seq->get_shape();
+        assert(shape.size() == 2);
       
-      int slice0=0;
-      for (uint j=0; j<dbn->nodes_0.size(); j++) {
-	slice0 += dbn->nodes_0[j]->get_output_size();
-      }
-      
-      int sliceN=0;
-      for (uint j=0; j<dbn->nodes_1.size(); j++) {
-	sliceN += dbn->nodes_1[j]->get_output_size();
-      }
-      
-      // Run through all slices
-      for (uint s=0; s<shape[0]; s++) {
-	MDArray<double> slice = seq->get_view(s);
-	if ((i==0 && slice.size() != slice0) || (i>0 && slice.size() != sliceN)) {
-	  cout << "Wrong number of data values in training sequence " << i+1 << " slice " << s+1 << endl;
+        int slice0=0;
+        for (uint j=0; j<dbn->nodes_0.size(); j++) {
+            slice0 += dbn->nodes_0[j]->get_output_size();
+        }
 
-	  cout << "Expected ";
-	  if (i==0)
-	    cout << slice0;
-	  else
-	    cout << sliceN;
+        int sliceN=0;
+        for (uint j=0; j<dbn->nodes_1.size(); j++) {
+            sliceN += dbn->nodes_1[j]->get_output_size();
+        }
+  
+        // Run through all slices
+        for (uint s=0; s<shape[0]; s++) {
+            MDArray<double> slice = seq->get_view(s);
+            if ((i==0 && slice.size() != slice0) || (i>0 && slice.size() != sliceN)) {
+                cout << "Wrong number of data values in training sequence " << i+1 << " slice " << s+1 << endl;
 
-	  cout << " data values, got " << slice.size() << " data values" << endl;
-	  
-	  exit(1);
-	}
-      }
+                cout << "Expected ";
+                if (i==0)
+                    cout << slice0;
+                else
+                    cout << sliceN;
+
+                cout << " data values, got " << slice.size() << " data values" << endl;
+
+                exit(1);
+            }
+        }
     } 
   
     // Check that each slice has a valid mismask

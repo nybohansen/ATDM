@@ -53,6 +53,9 @@
 #include "../mixed/mixedess.h"
 #include "../mixed/mixeddensities.h"
 
+#include "../multimixed/multimixedess.h"
+#include "../multimixed/multimixeddensities.h"
+
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -62,7 +65,10 @@
 namespace mocapy {
 
 typedef ChildNode<DiscreteESS, DiscreteDensities> DiscreteNode;
+
 typedef ChildNode<MixedESS, MixedDensities> MixedNode;
+typedef ChildNode<MultiMixedESS, MultiMixedDensities> MultiMixedNode;
+
 typedef ChildNode<GaussianESS, GaussianDensities> GaussianNode;
 typedef ChildNode<VonMisesESS, VonMisesDensities> VonMisesNode;
 typedef ChildNode<VonMises2dESS, VonMises2dDensities> VonMises2dNode;

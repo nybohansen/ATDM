@@ -33,7 +33,10 @@ public:
 	NodeFactory();
 	virtual ~NodeFactory();
 	static DiscreteNode* new_discrete_node(uint node_size, const char* name = NULL, bool init_random=false, CPD new_cpd=CPD(), Node* discrete_node=NULL, bool fixed=false);
+
 	static MixedNode* new_mixed_node(uint node_size, const char* name = NULL, bool init_random=false, CPD new_cpd=CPD(), Node* mixed_node=NULL, bool fixed=false);
+	static MultiMixedNode* new_multimixed_node(uint node_size, const char* name = NULL, bool init_random=false, Node* backend_node=NULL, Node* multimixed_node=NULL, CPD new_cpd=CPD(), bool fixed=false);
+	
 	static GaussianNode* new_gaussian_node(uint dimension, const char* name = NULL, bool init_random=false, bool shrinkage=false, MDArray<double> means=MDArray<double>(), MDArray<double> covs=MDArray<double>(), eCovType new_cov_type = FULL);
 	static MultinomialNode* new_multinomial_node(uint dimension, const char* name = NULL, bool init_random=false, double pseudocount=0);
     static DirichletNode* new_dirichlet_node(uint dimension, const char* name = NULL, bool init_random=false, double pseudocount=0);
