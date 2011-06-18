@@ -35,7 +35,7 @@ void MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node
 	ess_shape.resize(M_ESSSIZE);
     //M_D = indicator based on value
     ess_shape[M_D].set_shape(shape);
-    //M_V = Energy, E and E^2 based on value
+    //M_V = Gaussian Energy, E and E^2 based on value
     ess_shape[M_V].set_shape(shape);
           
 	ess_size = M_ESSSIZE;
@@ -44,7 +44,7 @@ void MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node
 
 // Add another sample to the ESS
 void MixedESS::add_ptv(vector<double> ptv) {
-
+    // cout << "ptc[PV] = " << (uint)ptv[PV] << " ptv[INDICATOR]=" << ptv[INDICATOR] << " ptv[ENERGY]=" << ptv[ENERGY] << endl;
     //Update the indicator table    
     ess[M_D].get_view( (uint)ptv[PV] )[ (uint) ptv[INDICATOR] ]++;
     if(ptv[INDICATOR]){
@@ -52,7 +52,7 @@ void MixedESS::add_ptv(vector<double> ptv) {
         ess[M_V].get_view( (uint)ptv[PV] )[ SUM ] += ptv[ENERGY];        
         ess[M_V].get_view( (uint)ptv[PV] )[ SUM_SQUARED ] += pow(ptv[ENERGY],2);
     }    
-
+    // cout << ess[M_D] << endl;
 }
 
 }
