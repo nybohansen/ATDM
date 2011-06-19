@@ -50,12 +50,16 @@ int main(void) {
     // em.load_mismask("data/mismask.dat");
     // em.load_weights("data/weights.dat");
     // em.load_sequences("data/traindata.dat");
-
+    
 	cout << "Starting EM loop" << endl;
 	for (uint i=0; i<100; i++) {
 		em.do_E_step(1, 10, true);
 		double ll = em.get_loglik();
+        
+        cout.precision (20);
 		cout << "LL= " << ll << endl;
+        cout.precision (5);
+    
         em.do_M_step();
 	}
 

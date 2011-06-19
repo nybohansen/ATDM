@@ -185,19 +185,19 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
 double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {  
     // cout << "MixedDensities::get_lik called with: " << ptv << " and log = " << log_space << endl;
 
-    uint dim = 1;
-    double* mean = new double[dim];
-    double *cov = new double[dim * dim];
-
-    for (uint i = 0; i < dim; i++) {
-        mean[i] = means[i];
-        for (uint j = 0; j < dim; j++) {
-	        cov[i] = variance[i];
-        }
-    }
-    // Must point to an int
-    double* s = normal_multivariate(1, 1, cov, mean, &(randomGen->moc_seed2));
-    cout << mean[0] << "," << cov[0] << "," << s[0] << endl;
+    // uint dim = 1;
+    // double* mean = new double[dim];
+    // double *cov = new double[dim * dim];
+    // 
+    // for (uint i = 0; i < dim; i++) {
+    //     mean[i] = means[i];
+    //     for (uint j = 0; j < dim; j++) {
+    //          cov[i] = variance[i];
+    //     }
+    // }
+    // // Must point to an int
+    // double* s = normal_multivariate(1, 1, cov, mean, &(randomGen->moc_seed2));
+    // cout << mean[0] << "," << cov[0] << "," << s[0] << endl;
     // vector<uint> sh = m.get_shape();
     // MDArray<double> sa(sh);
     // for (uint i = 0; i < dim; i++) {
