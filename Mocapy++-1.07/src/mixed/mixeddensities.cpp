@@ -26,13 +26,14 @@ using namespace std;
 
 namespace mocapy {
 
+// new_node_size, means, variance, cpd, new_init_random
+
 MixedDensities::MixedDensities() {
     // cout << "MixedDensities::MixedDensities()" << endl;
     initialize();
 }
 
 MixedDensities::MixedDensities(uint new_node_size, Prior * new_prior, bool new_init_random) {
-    // cout << "MixedDensities(uint new_node_size, Prior * new_prior, bool new_init_random)" << endl;
     // node_size is the number of states of the discrete node
     node_size = new_node_size;
     prior = new_prior;
@@ -56,26 +57,20 @@ void MixedDensities::initialize() {
 
 // Normalize CPD and make sure that CPD is 'well'
 void MixedDensities::set_cpd(CPD & new_cpd) {
-    // cout << "MixedDensities::set_cpd(CPD & new_cpd)" << endl;
     assert(new_cpd.size()> 0);
     cpd = new_cpd;
     cpd.add_inplace(_MIN_TRANSITION);
     cpd.normalize();
     cpd.clip(_MIN_TRANSITION, 1000);
     
-    // cout << "cpd = " << cpd << endl;
-    
     log_cpd = cpd;
     log_cpd.log_all();
     
     cum_cpd = cpd;
-    cum_cpd.cumsum();
-    
-    
+    cum_cpd.cumsum();    
 }
 
 CPD MixedDensities::make_random_cpd(vector<uint> & shape, bool no_zeroes) {
-    // cout << "MixedDensities::make_random_cpd(vector<uint> & shape, bool no_zeroes) " << endl;
     // Return a random CPD.
     CPD c(shape);
     c.randomize(randomGen);
@@ -89,7 +84,6 @@ CPD MixedDensities::make_random_cpd(vector<uint> & shape, bool no_zeroes) {
 }
 
 CPD MixedDensities::make_uniform_cpd(const vector<uint> & shape) {
-    // cout << "MixedDensities::make_uniform_cpd(const vector<uint> & shape)" << endl;
     // Return a uniform CPD.
     CPD c(shape);
 
@@ -102,8 +96,6 @@ CPD MixedDensities::make_uniform_cpd(const vector<uint> & shape) {
 
 // Called in node.construct, and initializes the density arrays
 void MixedDensities::construct(vector<uint> & parent_sizes) {
-    // cout << "MixedDensities::construct(vector<uint> & parent_sizes)" << endl;
-
     //Save the parrent size, we need it later
     parent_size = parent_sizes[0];
 
@@ -111,13 +103,13 @@ void MixedDensities::construct(vector<uint> & parent_sizes) {
     means.set_shape(parent_size);
     variance.set_shape(parent_size);
 
-
+    //Randomize the arrays
     means.randomize(randomGen);
     variance.randomize(randomGen);    
-            
     
+    //Calculate the CPD shape            
     CPD_shape = vec_conc(parent_sizes, output_size); 
-    // cout << "CPD_shape = " << CPD_shape << endl;
+
 
     if(user_cpd.empty()) {
         CPD cpd;
@@ -136,7 +128,6 @@ void MixedDensities::construct(vector<uint> & parent_sizes) {
 
 // Parameter estimation based on the ESS
 void MixedDensities::estimate(vector<MDArray<double> > & ess) {
-    // cout << "MixedDensities::estimate(vector<MDArray<double> > & ess)" << endl;
     assert(!ess.empty());
 
     for(uint i = 0; i < parent_size; i++){
@@ -152,14 +143,8 @@ void MixedDensities::estimate(vector<MDArray<double> > & ess) {
         }
     }
 
-    // cout << "ess[M_D]" << endl << ess[M_D] << endl;
-    // cout << "ess[M_CV]" << endl << ess[M_CV] << endl;
-    // cout << "means" << endl << means << endl;
-    // cout << "variance" << endl << variance << endl;
-        
     set_cpd(ess[M_D]);
-    // cout << "CPD" << endl;
-    // cout << cpd << endl;    
+ 
 }
 
 
@@ -174,14 +159,13 @@ double MixedDensities::sample_1d_gauss(vector<double> & pv){
 }
 
 double MixedDensities::sample_discrete(vector<double> & pv){
+    //Dummy function, just return 0 since in the discrete case the only value is 0.
     return 0;
 }
 
 
 // Return a sample, based on indicated parent values
 vector<double> MixedDensities::sample(vector<double> & pv) {
-    // cout << "MixedDensities::sample(vector<double> & pv) called with pv = " << pv << endl;
-
     //Draw random number in [0,1], see if above threshold. If it is, then sample from gauss, otherwise samplediscrete          
     vector<double> choice;
 
@@ -204,39 +188,34 @@ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {
     // cout << "double MixedDensities::get_lik(vector<double> & ptv, bool log_space)" << endl;
     if(ptv[INDICATOR]){
         
-        double a = ptv[ENERGY];
+        double a = ptv[ENERGY]; //Sample point we would like to test the likelihood of
         
         double mu = means[(uint)ptv[PV]]; //Mean
         double v = variance[(uint)ptv[PV]]; //Variance
         double s = sqrt(v); // the standard deviation
 
+        //Calculate the gaussian likelihood
         double x = 1/(sqrt(2*M_PI*v))*exp(-pow(a-mu,2)/(2*v));
 
+        //Multiply with the probability that we see a continous node
         x = x*cpd.get((uint)ptv[PV], CONTINUOUS_TYPE);
 
         if(x== 0){
+            //We are in trouble if x==0 since log(0) is illegal
+            //We still want to "Punish" the system so set x to a very low number
             x = _MIN_TRANSITION;
-            // cout << "x = _MIN_TRANSITION" << x << endl;
         } 
 
 		if (log_space){
-            // cout << "Returning likelihood " << log(x) << " for ptv = " << ptv << endl;
 		    return log(x);
 		}else{
-            // cout << "Returning likelihood " << x << " for ptv = " << ptv << endl;
 		    return x;
 		}
 		
     }else{
         if (log_space) {
-            // cout << "log_cpd" << endl << log_cpd << endl;
-            // cout << "log_cpd " << log_cpd.get((uint)ptv[PV], DISCRETE_TYPE) << endl;
-            // cout << "Returning likelihood " << log_cpd.get((uint)ptv[PV], DISCRETE_TYPE) << " for ptv = " << ptv << endl;
             return log_cpd.get((uint)ptv[PV], DISCRETE_TYPE);
         } else {
-            // cout << "cpd" << endl << cpd << endl;
-            // cout << "cpd " << cpd.get((uint)ptv[PV], DISCRETE_TYPE) << endl;
-            // cout << "Returning likelihood " << cpd.get((uint)ptv[PV], DISCRETE_TYPE) << " for ptv = " << ptv << endl;
             return cpd.get((uint)ptv[PV], DISCRETE_TYPE);
         }        
     }
@@ -245,20 +224,23 @@ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {
 
 // Return the distribtion's parameters
 vector<MDArray<double> > MixedDensities::get_parameters() {
-    cout << "MixedDensities::get_parameters()" << endl;
+   cout << "MixedDensities::get_parameters()" << endl;
    vector<MDArray<double> > ret;
+   //Return the CPD
    ret.push_back(cpd);
+   //Return the means
+   ret.push_back(means);   
+   //Return the variance
+   ret.push_back(variance);
    return ret;
 }
 
 
 void MixedDensities::set_user_cpd(CPD & new_user_cpd) {
-    cout << "MixedDensities::set_user_cpd(CPD & new_user_cpd)" << endl;
     user_cpd = new_user_cpd;
 }
 
 void MixedDensities::set_prior(Prior * new_prior) {
-    cout << "MixedDensities::set_prior(Prior * new_prior)" << endl;
     prior = new_prior;
 }
 

@@ -87,7 +87,6 @@ private:
     MDArray<double> variance;
     
     uint parent_size;
-	MDArray<double> CPD_Discrete;
  
 	// CPDs
 	CPD cpd;
@@ -103,8 +102,6 @@ void MixedDensities::serialize(Archive & ar, const unsigned int version) {
     ar & prior;
     ar & init_random;
 
-    // ar & user_means;
-    // ar & user_variance;
     ar & means;                
     ar & variance;
 
