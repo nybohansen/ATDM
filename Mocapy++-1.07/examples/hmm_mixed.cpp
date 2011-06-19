@@ -21,6 +21,7 @@ int main(void) {
 	Node* h1 = NodeFactory::new_discrete_node(1, "h1");
 	Node* o1 = NodeFactory::new_mixed_node(2, "o1");
 
+
 	// Nodes in slice 2
 	Node* h2 = NodeFactory::new_discrete_node(1, "h2");
 
@@ -37,28 +38,44 @@ int main(void) {
 	EMEngine em = EMEngine(&dbn, &mcmc);
 
     //Test data for mixed
-    // em.load_mismask("data/energy_CO_test20.mismask");
-    // em.load_sequences("data/energy_CO_test20.data");
+    em.load_mismask("data/energy_CO_test20.mismask");
+    em.load_sequences("data/energy_CO_test20.data");
     // em.load_mismask("data/energy_CO.mismask");
     // em.load_sequences("data/energy_CO.data");
-    em.load_mismask("data/energy_CO_verysmall.mismask");
-    em.load_sequences("data/energy_CO_verysmall.data");
+    // em.load_mismask("data/energy_CO_verysmall.mismask");
+    // em.load_sequences("data/energy_CO_verysmall.data");
     //   
 
     // em.load_mismask("data/mismask.dat");
     // em.load_weights("data/weights.dat");
     // em.load_sequences("data/traindata.dat");
 
+
+	double bestLL=-1000;
+	uint it_no_improvement(0);
+
 	cout << "Starting EM loop" << endl;
-	for (uint i=0; i<100; i++) {
+	while (it_no_improvement<30) {
+        //While we don't converge
 		em.do_E_step(1, 10, true);
 		double ll = em.get_loglik();
-        cout.precision(10);
-		cout << "LL= " << ll << endl;
+
+        cout.precision(15);
+		cout << "LL= " << ll ;
+		if (ll > bestLL) {
+			cout << " * saving model *" << endl;
+			dbn.save("mixed_hmm.dbn");
+			bestLL = ll;
+			it_no_improvement=0;
+		} else { 
+            cout << endl; 
+            it_no_improvement++;
+        }
         cout.precision(5);
         em.do_M_step();
-	}
-
+    }
+	    
+	    
 	cout << "h1: " << *h1 << endl;
 	cout << "o1: " << *o1 << endl;
 	cout << "h2: " << *h2 << endl;
