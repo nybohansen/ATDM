@@ -74,6 +74,10 @@ private:
 
 	CPD make_uniform_cpd(const std::vector<uint> & shape);
 	CPD make_random_cpd(std::vector<uint> & shape, bool no_zeroes = true);
+
+    double sample_1d_gauss(std::vector<double> & pv);
+    double sample_discrete(std::vector<double> & pv);
+    
 	Prior* prior;
 	bool init_random;
 

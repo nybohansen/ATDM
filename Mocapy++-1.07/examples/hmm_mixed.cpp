@@ -37,35 +37,35 @@ int main(void) {
 	EMEngine em = EMEngine(&dbn, &mcmc);
 
     //Test data for mixed
-    em.load_mismask("data/energy_CO_test20.mismask");
-    em.load_sequences("data/energy_CO_test20.data");
+    // em.load_mismask("data/energy_CO_test20.mismask");
+    // em.load_sequences("data/energy_CO_test20.data");
     // em.load_mismask("data/energy_CO.mismask");
     // em.load_sequences("data/energy_CO.data");
-    // em.load_mismask("data/energy_CO_verysmall.mismask");
-    // em.load_sequences("data/energy_CO_verysmall.data");
+    em.load_mismask("data/energy_CO_verysmall.mismask");
+    em.load_sequences("data/energy_CO_verysmall.data");
     //   
-
-
 
     // em.load_mismask("data/mismask.dat");
     // em.load_weights("data/weights.dat");
     // em.load_sequences("data/traindata.dat");
-    
+
 	cout << "Starting EM loop" << endl;
 	for (uint i=0; i<100; i++) {
 		em.do_E_step(1, 10, true);
 		double ll = em.get_loglik();
-        
-        cout.precision (20);
+        cout.precision(10);
 		cout << "LL= " << ll << endl;
-        cout.precision (5);
-    
+        cout.precision(5);
         em.do_M_step();
 	}
 
 	cout << "h1: " << *h1 << endl;
 	cout << "o1: " << *o1 << endl;
 	cout << "h2: " << *h2 << endl;
+
+    //Call the sampler!
+    pair<Sequence, double>  seq_ll = dbn.sample_sequence(11);
+
 
 	return EXIT_SUCCESS;
 }

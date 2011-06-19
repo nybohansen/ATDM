@@ -160,6 +160,8 @@ protected:
 
 template<class Archive>
 void DBN::save(Archive & ar, const unsigned int version) const {
+
+    ar.register_type(static_cast<MixedNode *>(NULL));
   
     ar.register_type(static_cast<DiscreteNode *>(NULL));
     ar.register_type(static_cast<GaussianNode *>(NULL));
@@ -201,6 +203,9 @@ void DBN::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void DBN::load(Archive & ar, const unsigned int version) {
+
+    ar.register_type(static_cast<MixedNode *>(NULL));
+
     ar.register_type(static_cast<DiscreteNode *>(NULL));
     ar.register_type(static_cast<GaussianNode *>(NULL));
     ar.register_type(static_cast<VonMisesNode *>(NULL));

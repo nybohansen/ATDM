@@ -28,6 +28,7 @@ namespace mocapy {
 
 MixedDensities::MixedDensities() {
     // cout << "MixedDensities::MixedDensities()" << endl;
+    initialize();
 }
 
 MixedDensities::MixedDensities(uint new_node_size, Prior * new_prior, bool new_init_random) {
@@ -36,6 +37,7 @@ MixedDensities::MixedDensities(uint new_node_size, Prior * new_prior, bool new_i
     node_size = new_node_size;
     prior = new_prior;
     init_random = new_init_random;
+    initialize();
 }
 
 MixedDensities::MixedDensities(uint new_node_size, CPD & new_user_cpd, Prior * new_prior) {
@@ -44,9 +46,13 @@ MixedDensities::MixedDensities(uint new_node_size, CPD & new_user_cpd, Prior * n
 	prior = new_prior;
 	user_cpd = new_user_cpd;
 	init_random = false;
+    initialize();
 }
 
-
+void MixedDensities::initialize() {
+    type = MIXED;
+    output_size = 2;     
+}
 
 // Normalize CPD and make sure that CPD is 'well'
 void MixedDensities::set_cpd(CPD & new_cpd) {
@@ -109,8 +115,6 @@ void MixedDensities::construct(vector<uint> & parent_sizes) {
     means.randomize(randomGen);
     variance.randomize(randomGen);    
             
-    type = MIXED;
-    output_size = 2;     
     
     CPD_shape = vec_conc(parent_sizes, output_size); 
     // cout << "CPD_shape = " << CPD_shape << endl;
@@ -137,19 +141,19 @@ void MixedDensities::estimate(vector<MDArray<double> > & ess) {
 
     for(uint i = 0; i < parent_size; i++){
         //For each parrent value, calculate mean and variance
-        if( ess[M_V].get_view(i)[SUM]!=0 ){
+        if( ess[M_CV].get_view(i)[SUM]!=0 ){
             //If the for value i is >0 we know that there must be at least one observation of value i    
             //The total number of observations made with a value i
             uint total = ess[M_D].get_view(i)[CONTINUOUS_TYPE];             
             //Calculate the mean for value i
-            means[i] = ess[M_V].get_view(i)[SUM]/total;
+            means[i] = ess[M_CV].get_view(i)[SUM]/total;
             //Calculate the variance for value i
-            variance[i] = ess[M_V].get_view(i)[SUM_SQUARED]/total - pow(means[i],2); 
+            variance[i] = ess[M_CV].get_view(i)[SUM_SQUARED]/total - pow(means[i],2); 
         }
     }
 
     // cout << "ess[M_D]" << endl << ess[M_D] << endl;
-    // cout << "ess[M_V]" << endl << ess[M_V] << endl;
+    // cout << "ess[M_CV]" << endl << ess[M_CV] << endl;
     // cout << "means" << endl << means << endl;
     // cout << "variance" << endl << variance << endl;
         
@@ -158,59 +162,46 @@ void MixedDensities::estimate(vector<MDArray<double> > & ess) {
     // cout << cpd << endl;    
 }
 
+
+double MixedDensities::sample_1d_gauss(vector<double> & pv){
+    //Draw sample from the gaussian distribution with estimated mean and variance
+    double* mean = new double[1];
+    double *var = new double[1];
+    mean[0] = means[(uint)pv[PV]];
+    var[0] = variance[(uint)pv[PV]];    
+    double* s = normal_multivariate(1, 1, var, mean, &(randomGen->moc_seed2));
+    return s[0];
+}
+
+double MixedDensities::sample_discrete(vector<double> & pv){
+    return 0;
+}
+
+
 // Return a sample, based on indicated parent values
 vector<double> MixedDensities::sample(vector<double> & pv) {
-    cout << "MixedDensities::sample(vector<double> & pv)" << endl;
-    
-    //Draw random number in [0,1], see if above threshold. If it is, then sample from gauss, otherwise samplediscrete   
-    
-    MDArray<double>* cumulative;
-    if (pv.empty())
-     cumulative = &cum_cpd;
-    else {
-     vector<uint> ipv;
-     toint(pv, ipv);
-     cumulative = &(cum_cpd.get_view(ipv));
-    }
-    
+    // cout << "MixedDensities::sample(vector<double> & pv) called with pv = " << pv << endl;
+
+    //Draw random number in [0,1], see if above threshold. If it is, then sample from gauss, otherwise samplediscrete          
+    vector<double> choice;
+
     double r = randomGen->get_rand();
     
-    assert(r<=1 && r>=0);
-    vector<double> choice;
-    choice.push_back( cumulative->bisect(r) );
+    if(cpd.get((uint)pv[PV], DISCRETE_TYPE)<r){
+        //Sample from discrete distribution
+        choice.push_back( DISCRETE_TYPE );
+        choice.push_back( sample_discrete( pv ) );        
+    }else{
+        //Sample from continouos distribution
+        choice.push_back( CONTINUOUS_TYPE );
+        choice.push_back( sample_1d_gauss( pv ) );                
+    }
     return choice;
 }
 
 // Return likelihood, that is: P(child|parents)
 double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {  
-    // cout << "MixedDensities::get_lik called with: " << ptv << " and log = " << log_space << endl;
-
-    // uint dim = 1;
-    // double* mean = new double[dim];
-    // double *cov = new double[dim * dim];
-    // 
-    // for (uint i = 0; i < dim; i++) {
-    //     mean[i] = means[i];
-    //     for (uint j = 0; j < dim; j++) {
-    //          cov[i] = variance[i];
-    //     }
-    // }
-    // // Must point to an int
-    // double* s = normal_multivariate(1, 1, cov, mean, &(randomGen->moc_seed2));
-    // cout << mean[0] << "," << cov[0] << "," << s[0] << endl;
-    // vector<uint> sh = m.get_shape();
-    // MDArray<double> sa(sh);
-    // for (uint i = 0; i < dim; i++) {
-    //   sa.set(i, s[i]);
-    // }
-
-
-
-
-    // double *normal_multivariate(int dim_num, int n, double r[], double mu[],
-    // double* s = normal_multivariate(1, 1, variance1, mean1, 0); 
-    // cout << *s << endl;
-
+    // cout << "double MixedDensities::get_lik(vector<double> & ptv, bool log_space)" << endl;
     if(ptv[INDICATOR]){
         
         double a = ptv[ENERGY];
@@ -229,9 +220,10 @@ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {
         } 
 
 		if (log_space){
+            // cout << "Returning likelihood " << log(x) << " for ptv = " << ptv << endl;
 		    return log(x);
 		}else{
-            // cout << "Returning likelihood " << x << " for ptv = " << ptv ;
+            // cout << "Returning likelihood " << x << " for ptv = " << ptv << endl;
 		    return x;
 		}
 		
@@ -239,12 +231,12 @@ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {
         if (log_space) {
             // cout << "log_cpd" << endl << log_cpd << endl;
             // cout << "log_cpd " << log_cpd.get((uint)ptv[PV], DISCRETE_TYPE) << endl;
-            // cout << "Returning likelihood " << log_cpd.get((uint)ptv[PV], DISCRETE_TYPE) << " for ptv = " << ptv ;
+            // cout << "Returning likelihood " << log_cpd.get((uint)ptv[PV], DISCRETE_TYPE) << " for ptv = " << ptv << endl;
             return log_cpd.get((uint)ptv[PV], DISCRETE_TYPE);
         } else {
             // cout << "cpd" << endl << cpd << endl;
             // cout << "cpd " << cpd.get((uint)ptv[PV], DISCRETE_TYPE) << endl;
-            // cout << "Returning likelihood " << cpd.get((uint)ptv[PV], DISCRETE_TYPE) << " for ptv = " << ptv ;
+            // cout << "Returning likelihood " << cpd.get((uint)ptv[PV], DISCRETE_TYPE) << " for ptv = " << ptv << endl;
             return cpd.get((uint)ptv[PV], DISCRETE_TYPE);
         }        
     }
@@ -253,7 +245,7 @@ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {
 
 // Return the distribtion's parameters
 vector<MDArray<double> > MixedDensities::get_parameters() {
-    // cout << "MixedDensities::get_parameters()" << endl;
+    cout << "MixedDensities::get_parameters()" << endl;
    vector<MDArray<double> > ret;
    ret.push_back(cpd);
    return ret;
@@ -261,12 +253,12 @@ vector<MDArray<double> > MixedDensities::get_parameters() {
 
 
 void MixedDensities::set_user_cpd(CPD & new_user_cpd) {
-    // cout << "MixedDensities::set_user_cpd(CPD & new_user_cpd)" << endl;
+    cout << "MixedDensities::set_user_cpd(CPD & new_user_cpd)" << endl;
     user_cpd = new_user_cpd;
 }
 
 void MixedDensities::set_prior(Prior * new_prior) {
-    // cout << "MixedDensities::set_prior(Prior * new_prior)" << endl;
+    cout << "MixedDensities::set_prior(Prior * new_prior)" << endl;
     prior = new_prior;
 }
 
