@@ -1,6 +1,6 @@
 /*
- * hmm_mixed.cpp
- *
+ * hmm_mixed2.cpp
+ * Test of Sampling and inference
  *  Created on: 16. jun 2011
  *      Author: Kasper Nybo Hansen
  */
@@ -33,7 +33,7 @@ int main(void) {
 	// The target DBN (This DBN generates the data)
 	Node* th0 = NodeFactory::new_discrete_node(H_SIZE, "th0", init_random);
 	Node* th1 = NodeFactory::new_discrete_node(H_SIZE, "th1", init_random);
-	Node* to0 = NodeFactory::new_mixed_node(O_SIZE, "to0");
+	Node* to0 = NodeFactory::new_mixed_node(O_SIZE, "to0", true);
 
 	DBN tdbn;
 	tdbn.set_slices(vec(th0, to0), vec(th1, to0));

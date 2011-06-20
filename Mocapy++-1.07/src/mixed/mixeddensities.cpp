@@ -26,27 +26,29 @@ using namespace std;
 
 namespace mocapy {
 
-// new_node_size, means, variance, cpd, new_init_random
+
 
 MixedDensities::MixedDensities() {
     // cout << "MixedDensities::MixedDensities()" << endl;
     initialize();
 }
 
-MixedDensities::MixedDensities(uint new_node_size, Prior * new_prior, bool new_init_random) {
+MixedDensities::MixedDensities(uint new_node_size, bool new_init_random, MDArray<double> user_means, MDArray<double> user_variance){
     // node_size is the number of states of the discrete node
     node_size = new_node_size;
-    prior = new_prior;
     init_random = new_init_random;
+    means = user_means;
+    variance = user_variance;
     initialize();
 }
 
-MixedDensities::MixedDensities(uint new_node_size, CPD & new_user_cpd, Prior * new_prior) {
+MixedDensities::MixedDensities(uint new_node_size, CPD & new_user_cpd, MDArray<double> user_means, MDArray<double> user_variance){
 	// node_size is the number of states of the discrete node
 	node_size = new_node_size;
-	prior = new_prior;
 	user_cpd = new_user_cpd;
 	init_random = false;
+    means = user_means;
+    variance = user_variance;	
     initialize();
 }
 
@@ -98,11 +100,9 @@ CPD MixedDensities::make_uniform_cpd(const vector<uint> & shape) {
 void MixedDensities::construct(vector<uint> & parent_sizes) {
     //Save the parrent size, we need it later
     parent_size = parent_sizes[0];
-
     //Initialize the mean and variance arrays
     means.set_shape(parent_size);
     variance.set_shape(parent_size);
-
     //Randomize the arrays
     means.randomize(randomGen);
     variance.randomize(randomGen);    
@@ -153,7 +153,7 @@ double MixedDensities::sample_1d_gauss(vector<double> & pv){
     double* mean = new double[1];
     double *var = new double[1];
     mean[0] = means[(uint)pv[PV]];
-    var[0] = variance[(uint)pv[PV]];    
+    var[0] = sqrt(variance[(uint)pv[PV]]);    
     double* s = normal_multivariate(1, 1, var, mean, &(randomGen->moc_seed2));
     return s[0];
 }
@@ -180,6 +180,7 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
         choice.push_back( CONTINUOUS_TYPE );
         choice.push_back( sample_1d_gauss( pv ) );                
     }
+    cout << choice << endl;
     return choice;
 }
 
@@ -238,10 +239,6 @@ vector<MDArray<double> > MixedDensities::get_parameters() {
 
 void MixedDensities::set_user_cpd(CPD & new_user_cpd) {
     user_cpd = new_user_cpd;
-}
-
-void MixedDensities::set_prior(Prior * new_prior) {
-    prior = new_prior;
 }
 
 //Override operator <<

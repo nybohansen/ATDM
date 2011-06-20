@@ -36,9 +36,17 @@ std::ostream& operator<<(std::ostream&, const MixedDensities&);
 
 class MixedDensities : public DensitiesBase {
 public:
-	MixedDensities();
-	MixedDensities(uint new_node_size, Prior * new_prior=NULL, bool new_init_random = false);
-	MixedDensities(uint new_node_size, CPD & new_user_cpd, Prior * new_prior=NULL);
+	MixedDensities();                                                                       
+
+    MixedDensities(uint new_node_size, 
+                   bool new_init_random = false,
+                   MDArray<double> user_means = MDArray<double> (), 
+                   MDArray<double> user_variance = MDArray<double> ());
+                   
+    MixedDensities(uint new_node_size, 
+                   CPD & new_user_cpd, 
+                   MDArray<double> user_means = MDArray<double> (), 
+                   MDArray<double> user_variance = MDArray<double> ()); 
 	virtual ~MixedDensities() {};
 
 	// Initializes the Density arrays
@@ -99,7 +107,6 @@ private:
 template<class Archive>
 void MixedDensities::serialize(Archive & ar, const unsigned int version) {
     ar & boost::serialization::base_object<DensitiesBase>(*this);
-    ar & prior;
     ar & init_random;
 
     ar & means;                

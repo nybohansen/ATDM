@@ -138,7 +138,7 @@ int main(void) {
 			bestLL = ll;
 			it_no_improvement=0;
 		}
-		else { it_no_improvement++; cout << endl; }
+		else {; cout << endl; }
 
 		i++;
 		em.do_M_step();

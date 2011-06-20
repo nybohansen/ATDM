@@ -50,9 +50,9 @@ DiscreteNode* NodeFactory::new_discrete_node(uint node_size, const char* name, b
 }
 
 
-MixedNode* NodeFactory::new_mixed_node(uint node_size, const char* name, bool init_random, CPD new_cpd, Node* mixed_node, bool fixed) {
+MixedNode* NodeFactory::new_mixed_node(uint node_size, const char* name, bool init_random, CPD new_cpd, Node* mixed_node, MDArray<double> user_means, MDArray<double> user_variance) {
 	MixedNode* n = new MixedNode();
-	n->set_densities( MixedDensities(node_size, NULL, init_random ) );
+	n->set_densities( MixedDensities(node_size, init_random, user_means, user_variance) );
 
 	assert(!mixed_node || new_cpd.empty());
 
@@ -63,7 +63,6 @@ MixedNode* NodeFactory::new_mixed_node(uint node_size, const char* name, bool in
 	if (!new_cpd.empty()) {
 		n->get_densities()->set_user_cpd(new_cpd);
 	}
-	n->fixed=fixed;
 	n->set_name(name);
 	return n;
 }

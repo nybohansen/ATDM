@@ -38,17 +38,8 @@ int main(void) {
 	EMEngine em = EMEngine(&dbn, &mcmc);
 
     //Test data for mixed
-    // em.load_mismask("data/energy_CO_test20.mismask");
-    // em.load_sequences("data/energy_CO_test20.data");
-    em.load_mismask("data/energy_CO.mismask");
-    em.load_sequences("data/energy_CO.data");
-    // em.load_mismask("data/energy_CO_verysmall.mismask");
-    // em.load_sequences("data/energy_CO_verysmall.data");
-    //   
-
-    // em.load_mismask("data/mismask.dat");
-    // em.load_weights("data/weights.dat");
-    // em.load_sequences("data/traindata.dat");
+    em.load_mismask("data/energy_NH.mismask");
+    em.load_sequences("data/energy_NH.data");
 
 
 	double bestLL=-1000;
@@ -74,7 +65,7 @@ int main(void) {
         cout.precision(5);
         em.do_M_step();
     }
-	                                                  
+
 	    
 	cout << "h1: " << *h1 << endl;
 	cout << "o1: " << *o1 << endl;
