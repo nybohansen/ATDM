@@ -140,18 +140,16 @@ void MixedDensities::estimate(vector<MDArray<double> > & ess) {
     }
     
     set_cpd(ess[M_D]);
-    
-    cout << "cpd = " << endl << cpd << endl;
 }
 
 
 double MixedDensities::sample_1d_gauss(vector<double> & pv){
     //Draw sample from the gaussian distribution with estimated mean and variance
     double* mean = new double[1];
-    double *var = new double[1];
+    double *sd = new double[1];
     mean[0] = means[(uint)pv[PV]];
-    var[0] = sqrt(variance[(uint)pv[PV]]);    
-    double* s = normal_multivariate(1, 1, var, mean, &(randomGen->moc_seed2));
+    sd[0] = sqrt(variance[(uint)pv[PV]]);    
+    double* s = normal_multivariate(1, 1, sd, mean, &(randomGen->moc_seed2));
     return s[0];
 }
 
@@ -176,13 +174,12 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
         choice.push_back( CONTINUOUS_TYPE );
         choice.push_back( sample_1d_gauss( pv ) );                
     }             
-    // cout << choice << endl;
+    cout << choice << endl;
     return choice;
 }
 
 // Return likelihood, that is: P(child|parents)
 double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {  
-    // cout << "double MixedDensities::get_lik(vector<double> & ptv, bool log_space)" << endl;
     if(ptv[INDICATOR]){
         
         double a = ptv[ENERGY]; //Sample point we would like to test the likelihood of
@@ -197,7 +194,7 @@ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {
         //Multiply with the probability that we see a continous node
         x = x*cpd.get((uint)ptv[PV], CONTINUOUS_TYPE);
 
-        if(x== 0){
+        if(x == 0){
             //We are in trouble if x==0 since log(0) is illegal
             //We still want to "Punish" the system so set x to a very low number
             x = _MIN_TRANSITION;

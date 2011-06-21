@@ -13,7 +13,7 @@ using namespace mocapy;
 using namespace std;
 
 int main(void) {
-   	mocapy_seed((uint)5556574);
+    // mocapy_seed((uint)5556574);
 
 	// Number of trainining sequences
 	int N = 100;
@@ -28,7 +28,6 @@ int main(void) {
 	uint H_SIZE=1;
 	uint O_SIZE=2;
 	bool init_random=false;
-
 
 	// The target DBN (This DBN generates the data)
 	Node* th0 = NodeFactory::new_discrete_node(H_SIZE, "th0", init_random);
@@ -46,7 +45,7 @@ int main(void) {
 	// For mh0, get the CPD from th0 and fix parameters
 	Node* mh0 = NodeFactory::new_discrete_node(H_SIZE, "mh0", init_random);
 	Node* mh1 = NodeFactory::new_discrete_node(H_SIZE, "mh1", init_random);
-	Node* mo0 = NodeFactory::new_mixed_node(O_SIZE, "mo0");
+	Node* mo0 = NodeFactory::new_mixed_node(O_SIZE, "mo0", false);
 
 	DBN mdbn;
 	mdbn.set_slices(vec(mh0, mo0), vec(mh1, mo0));
@@ -99,8 +98,7 @@ int main(void) {
 		cout << "LL= " << ll;
 
 		if (ll > bestLL) {
-			cout << " * saving model *" << endl;
-			mdbn.save("gaussian_hmm.dbn");
+			mdbn.save("mixed_hmm2.dbn");
 			bestLL = ll;
 			it_no_improvement=0;
 		}
@@ -112,7 +110,7 @@ int main(void) {
 
 	cout << "DONE" << endl;
 
-	mdbn.load("gaussian_hmm.dbn");
+	mdbn.load("mixed_hmm2.dbn");
 
 	cout << "*** TARGET ***" << endl;
 	cout << *th0 << endl;

@@ -30,7 +30,8 @@ void MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node
 
     //Sorry, only nodes with sizes two are supported.
     assert(node_size == 2);
-    
+
+    //Calculate shape of node
 	vector<uint> shape = vec_conc(parent_sizes, node_size);
 		
 	ess_shape.resize(M_ESSSIZE);
@@ -45,7 +46,6 @@ void MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node
 
 // Add another sample to the ESS
 void MixedESS::add_ptv(vector<double> ptv) {
-    // cout << "ptc[PV] = " << (uint)ptv[PV] << " ptv[INDICATOR]=" << ptv[INDICATOR] << " ptv[ENERGY]=" << ptv[ENERGY] << endl;
     //Update the indicator table    
     ess[M_D].get_view( (uint)ptv[PV] )[ (uint) ptv[INDICATOR] ]++;
     if(ptv[INDICATOR]){

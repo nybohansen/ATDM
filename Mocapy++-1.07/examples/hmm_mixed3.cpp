@@ -18,7 +18,7 @@ int main(void) {
 
 	DBN mdbn;
 
-	mdbn.load("mixed_hmm.dbn");
+	mdbn.load("mixed_hmm2.dbn");
 
     std::vector<Node*> nodes = mdbn.getNodes0(); 
     
