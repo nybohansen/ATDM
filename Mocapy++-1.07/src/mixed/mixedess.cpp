@@ -27,11 +27,12 @@ namespace mocapy {
 
 // Initializes the ESS arrays.
 void MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node_size) {
-    // cout << "MixedESS::construct(vector<uint> & parent_sizes, uint output_dim, uint node_size)" << endl;
-    cout << "Parent size = " << parent_sizes << " output_dim = " << output_dim << " Node size = " << node_size << endl;
 
+    //Sorry, only nodes with sizes two are supported.
+    assert(node_size == 2);
+    
 	vector<uint> shape = vec_conc(parent_sizes, node_size);
-	
+		
 	ess_shape.resize(M_ESSSIZE);
     //M_D = indicator based on value
     ess_shape[M_D].set_shape(shape);

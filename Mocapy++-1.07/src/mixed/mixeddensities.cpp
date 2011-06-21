@@ -29,12 +29,10 @@ namespace mocapy {
 
 
 MixedDensities::MixedDensities() {
-    // cout << "MixedDensities::MixedDensities()" << endl;
     initialize();
 }
 
 MixedDensities::MixedDensities(uint new_node_size, bool new_init_random, MDArray<double> user_means, MDArray<double> user_variance){
-    // node_size is the number of states of the discrete node
     node_size = new_node_size;
     init_random = new_init_random;
     means = user_means;
@@ -43,7 +41,6 @@ MixedDensities::MixedDensities(uint new_node_size, bool new_init_random, MDArray
 }
 
 MixedDensities::MixedDensities(uint new_node_size, CPD & new_user_cpd, MDArray<double> user_means, MDArray<double> user_variance){
-	// node_size is the number of states of the discrete node
 	node_size = new_node_size;
 	user_cpd = new_user_cpd;
 	init_random = false;
@@ -110,7 +107,6 @@ void MixedDensities::construct(vector<uint> & parent_sizes) {
     //Calculate the CPD shape            
     CPD_shape = vec_conc(parent_sizes, output_size); 
 
-
     if(user_cpd.empty()) {
         CPD cpd;
         if(!init_random) {
@@ -142,9 +138,10 @@ void MixedDensities::estimate(vector<MDArray<double> > & ess) {
             variance[i] = ess[M_CV].get_view(i)[SUM_SQUARED]/total - pow(means[i],2); 
         }
     }
-
+    
     set_cpd(ess[M_D]);
- 
+    
+    cout << "cpd = " << endl << cpd << endl;
 }
 
 
@@ -159,7 +156,7 @@ double MixedDensities::sample_1d_gauss(vector<double> & pv){
 }
 
 double MixedDensities::sample_discrete(vector<double> & pv){
-    //Dummy function, just return 0 since in the discrete case the only value is 0.
+    //Dummy function, just return 0 since in the discrete case the only energy is 0.
     return 0;
 }
 
@@ -170,8 +167,7 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
     vector<double> choice;
 
     double r = randomGen->get_rand();
-    
-    if(cpd.get((uint)pv[PV], DISCRETE_TYPE)<r){
+    if(cpd.get((uint)pv[PV], DISCRETE_TYPE)>r){
         //Sample from discrete distribution
         choice.push_back( DISCRETE_TYPE );
         choice.push_back( sample_discrete( pv ) );        
@@ -179,8 +175,8 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
         //Sample from continouos distribution
         choice.push_back( CONTINUOUS_TYPE );
         choice.push_back( sample_1d_gauss( pv ) );                
-    }
-    cout << choice << endl;
+    }             
+    // cout << choice << endl;
     return choice;
 }
 
