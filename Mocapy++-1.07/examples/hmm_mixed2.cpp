@@ -25,7 +25,7 @@ int main(void) {
 	int MCMC_BURN_IN = 10;
 
 	// HMM hidden and observed node sizes
-	uint H_SIZE=1;
+	uint H_SIZE=5;
 	uint O_SIZE=2;
 	bool init_random=false;
 
@@ -95,7 +95,7 @@ int main(void) {
 
 		double ll = em.get_loglik();
 
-		cout << "LL= " << ll;
+		cout << "LL= " << ll << endl;
 
 		if (ll > bestLL) {
 			mdbn.save("mixed_hmm2.dbn");

@@ -1,7 +1,9 @@
 
-\documentclass[10pt, journal, compsocconf,a4paper]{IEEEtran}
+\documentclass[10pt, journal, compsoc, a4paper]{IEEEtran}
 
 \usepackage[pdftex]{graphicx}
+\usepackage{listings}
+\usepackage{todonotes}
 
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -34,48 +36,46 @@ Mocapy++; DIKU; Dynamic Bayesian networks; Mixed probability distribution
 \section{Introduction} % (fold)
 \label{sec:introduction}
 
-% http://www.stat.uiowa.edu/~nshyamal/22S175/DI.pdf
-% 
-% http://www.tutorvista.com/math/mixed-probability-distribution
-% http://www.freemathhelp.com/forum/viewtopic.php?f=12&t=34692
-% 
-% Good explanation
-% http://www.ds.unifi.it/VL/VL_EN/dist/dist3.html
-
-An introduction with a short discussion of the theory of inference and learning in Bayesian networks, relevant to Mocapy++.
-
+This section gives a short introduction to the theory of inference and learning in Bayesian networks that are relevant to the implementation that are presented later in the paper.
 
 \subsection{Dynamic Bayesian Network} % (fold)
 \label{sub:dynamic_bayesian_network}
-A Bayesian network consists of a Directed Acyclic Graph where the nodes are random variables. Each edge in a Bayesian network represents a probabilistic dependency. More precisely figure \ref{fig2} shows a Bayesian network where the probability of observing $o1$ is dependent on $h1$. We call the node $o1$ the observed node and $h1$ and $h2$ the hidden nodes. 
+A Bayesian network consists of a Directed Acyclic Graph where the nodes are random variables. Each edge in a Bayesian network represents a probabilistic dependency. Figure \ref{fig2} shows a Bayesian network where e.g. the probability of observing $o1$ is dependent on $h1$. We call the node $o1$ the observed node and $h1$ and $h2$ the hidden nodes. 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.1\textwidth]{figures/fig2.pdf}
-\caption{Example of the bayesian network}
+\includegraphics[width=0.2\textwidth]{figures/fig2.pdf}
+\caption{Example of a bayesian network, $o_1$ is the observed node and $h_1$ and $h_2$ are hidden nodes}
 \label{fig2}
 \end{figure}
+
+We can learn the the probabilities of the hidden node, through the observed node, and this process is called inference. Mocapy++ used Gibbs sampling to do inference on the hidden nodes. 
+
+In this paper the observed node is a new node type called a mixed node. This node can only have one parent, and this parent and the parent needs to return discrete values. The number of different values the parent node can take, is also called the parent nodes size. The size of the parent node to a mixed node can be arbitrarily large i.e. the value can take integer values in the range $[0,n]$.
+
+When doing inference we learn the parameters of the hidden nodes based on the observations made in the mixed node. The goal is to learn the distribution of the values of the parent mode. 
+
+The parameter learning is done through the Expectation Maximization (EM) algorithm. In the E-step the values of the hidden nodes are inferred using the parameter settings present at that current time. To approximate the probability distributions of the hidden nodes, Mocapy++ uses Gibbs sampling.
+
+In the M-step the inferred values of the hidden nodes are used to update the parameters of the DBN. These two steps are repeated until convergence is reached, or some maximum number of cycles has been run. 
+
 % subsection dynamic_bayesian_network (end)
-
-\subsection{Mixed node} % (fold)
-\label{sub:mixed_node}
-The implemented mixed node takes exactly one discrete parent. The parent node can have any size $n$, i.e. it can take on integer values in the range $[0,n]$.
-% subsection mixed_node (end)
-
 
 \subsection{Mixed distribution} % (fold)
 \label{sub:mixed_distribution}
-The mixed distribution can be divided into two parts. A discrete and continuous part. Let $X$ be a random variable that takes values in the set $S$. We then define the discrete part as the countable set $D \subseteq S$, and the continuous part as $C \subseteq S$. We define a mixed distribution as a distribution that has the following two probabilities
+The mixed node has a mixed distribution.
+
+The mixed distribution can be divided into two parts. A discrete and continuous part. Let $X$ be a random variable that takes values in the set $S$. We then define the discrete part as the countable set $D \subseteq S$, and the continuous part as $C \subseteq S$. We define a mixed distribution as a distribution that has the following two properties
 
 \begin{center}
   \begin{itemize}
     \item $0 < P(x \in D) < 1$
     \item $P(x \in C) = 0$
-  \end{itemize} 
-  
+  \end{itemize}   
 \end{center}
+the first property ensures that no element in the discrete set $D$ has zero probability. The second property ensures that $C$ is a continuous set, thus there are infinite many elements, and the probability of drawing a single element is thus $0$. 
 
-The discrete part of the distribution can be described by a distribution table. The table will in the implemented node consist of two entries, that sums to exactly $1$. The first entry describes the probability of the node being a discrete node, the second entry describing the probability of the node being a continuous node. Define $P(X = discrete)$ as the probability that the node is discrete, and $1-P(X = discrete)$ as the probability that the node is continuous. 
+The discrete part of the distribution can be described by a distribution table. The distribution table in the mixed node consist of two entries that sums to exactly $1$. This table is called the conditional probability density (CPD). The first entry describes the probability of the node being a discrete node, the second entry describes the probability of the node being a continuous node. Define $P(X = discrete)$ as the probability that the node is discrete, and $P(X = continuous) = 1-P(X = discrete)$ as the probability that the node is continuous. 
 
 The continuous part of the mixed distribution consist of the Gaussian distribution aka. the normal distribution. The Gaussian is defined as
 
@@ -90,7 +90,7 @@ We wish to estimate the parameters of the discrete and continuous distribution. 
   \hat{P}(X = discrete) = \frac{\#discrete}{\#total}
   \label{eq3} 
 \end{equation}
-and
+and by definition we have that the maximum likelihood of encountering a continuous node is
 \begin{equation}
   \hat{P}(X = continuous) = 1 - \hat{P}(X = discrete)
 \end{equation}
@@ -106,10 +106,10 @@ we wish to maximize this function, so we take the derivative and find the statio
   \hat{\mu} = \overline{x} \equiv \frac{1}{n}\sum_{i=1}^n x_i, \qquad \hat{\sigma}^2 = \frac{1}{n} \sum_{i=1}^n (x_i - \overline{x})^2
   \label{eq1}
 \end{equation}
-so the parameters of the Gaussian distribution can be estimated from the continuous samples by the two equations \ref{eq1}. 
+so the parameters of the Gaussian distribution can be estimated from the continuous samples by the two equations in \ref{eq1}. 
 
 
-Having the parameters to the distribution models in the mixed model we would also like to be able to calculate the likelihood of a sample belonging to the mixed node. We can calculate this likelihood in the following way. Let the sample consist of two elements $s = {d, e}$. The likelihood of $s$ can then be calculated as
+Having the parameters of the distribution models in the mixed model we would also like to be able to calculate the likelihood of a sample belonging to the mixed node. We can calculate this likelihood in the following way. Let the sample consist of two elements $s = {d, e}$. The likelihood of $s$ can then be calculated as
 \begin{equation} 
 L(s) = 
 \left\{
@@ -136,8 +136,7 @@ The mixed distribution applies to hydrogen bonding in the following way. A hydro
 
 Under the assumption that the energy of a hydrogen bonding can be modeled by a Gaussian probability distribution we can model a hydrogen bond in the following way. The discrete distribution is modeling the first boolean case, i.e. "Is the bond present or not?". If the bond is present, the Continuous part can be used to to find the energy, $E$, of the bond.
 
-The assumption that the energy is modeled by a Gaussian distribution is somewhat crude. Although simple investigation of the energies present in the supplied dataset, actually indicates that the energy could follow a normal distribution.
-
+The assumption that the energy is modeled by a Gaussian distribution is somewhat crude. Although simple investigation of the energies present in the supplied dataset, actually indicates that the energy could be modeled by a Gaussian distribution. 
 % subsection applications_to_hydrogen_bounding (end)
 
 
@@ -145,10 +144,11 @@ The assumption that the energy is modeled by a Gaussian distribution is somewhat
 
 \section{Implementation} % (fold)
 \label{sec:implementation}
+The following section describes in detail the implemented mixed node.
 
 \subsection{Adding the mixed node} % (fold)
 \label{sub:adding_the_mixed_node}
-The mixed node is added to the framework, by creating a new node type in \texttt{dbn.h}. The new type defines the name of the density and ESS classes, furthermore it defines the typename, which is called \texttt{mixednode}. Furthermore a nodetype is added to \texttt{node.h}, called mixed.
+The mixed node is added to the framework by creating a new node type in \texttt{dbn.h}. The new type defines the name of the density and ESS classes, furthermore it defines the typename, which is called \texttt{mixednode}. A new node type is also added to \texttt{node.h}, called \texttt{mixed}.
 
 In order to create new nodes, the \texttt{nodefactory} class is extended with a new method called \texttt{new\_mixed\_node}. The new mixed node takes the following parameters
 
@@ -161,13 +161,13 @@ In order to create new nodes, the \texttt{nodefactory} class is extended with a 
   \item Variance: User specified variance array, Optional
 \end{itemize}
 
-In this report we assume that the node size of our mixed node is always $2$, this assumption also has the effect that the Gaussian is in 1D. I have included the node size as an argument in order to make it easy to expand the mixed node to handle multidimensional Gaussian distributions in future versions of the mixed node. 
+In this report we assume that the node size of our mixed node is always $2$, this assumption also has the effect that the Gaussian is one dimensional. I have included the node size as an argument, in order to make it easy to expand the mixed node in future works, so it can handle multidimensional Gaussian distributions. 
 
-There are several optional arguments to the \texttt{new\_mixed\_node} method. If nothing is specified in the optional arguments the following default behavior is applied. If nothing is specified in init\_random the node will be initialized with a uniform CPD. If nothing is specified in the means and variance arguments then these are initialized randomly.
+There are several optional arguments to the \texttt{new\_mixed\_node} method. If nothing is specified in the optional arguments, the following default behavior is applied. If nothing is specified in init\_random the node will be initialized with a uniform CPD. If nothing is specified in the means and variance arguments then these are initialized randomly.
 
-The node consist of four files:\texttt{ mixedess.h}, \texttt{mixedess.cpp}, \texttt{mixeddensities.h} and \texttt{mixeddensities.cpp}. All four files resides in the \texttt{mixed} directory of the \texttt{src} folder.
+The node consist of four files: \texttt{mixedess.h}, \texttt{mixedess.cpp}, \texttt{mixeddensities.h} and \texttt{mixeddensities.cpp}. All four files resides in the \texttt{mixed} directory of the \texttt{src} folder.
 
-The following sections elaborate on the implementation of the individual parts of the node.
+The following sub-sections elaborate on the individual parts of the mixed node implementation.
 
 % subsection adding_the_mixed_node (end)
 
@@ -199,13 +199,13 @@ If $Indicator=0$ then we know that the sample is a discrete sample, otherwise it
 The first table stores the number of observations of discrete and continuous nodes. It has size equal to the parent size $\times$ node size. The table has a row for each value the parent can take. For each value of the parent the ESS thus stores the number of discrete and the number of continuous nodes. Define the parent with value $i$ as $p_i$, and define the size of the parent node as $n$. Then the following table yields an outline of the first table stored in the ESS
 \begin{center}
   \begin{tabular}{c | c | c}
-  $p_0$ & \#Discrete obs for $p_0$ & \#Continuous obs for $p_0$ \\
-  $p_1$ & \#Discrete obs for $p_1$ & \#Continuous obs for $p_1$ \\
+  $p_0$ & \#Discrete for $p_0$ & \#Continuous for $p_0$ \\
+  $p_1$ & \#Discrete for $p_1$ & \#Continuous for $p_1$ \\
   \vdots & \vdots & \vdots \\
-  $p_{n-1}$ & \#Discrete obs for $p_{n-1}$ & \#Continuous obs for $p_{n-1}$ 
+  $p_{n-1}$ & \#Discrete for $p_{n-1}$ & \#Continuous for $p_{n-1}$ 
   \end{tabular}  
 \end{center}
-where \# means `number of' and obs is a abbreviation for observations.
+where the entries is the number of discrete and continuous observations for a particular parent.
 
 The second table stored in the ESS has the size parent size $\times$ node size. For each parent value we store two entities. The first entity is the sum of the energies, and the second is the sum of the squared energies. Define all the energy samples belonging to parent $p_i$ as $E_i$, then for each continuous sample with parent value $p_i$ we sum the energy in one column and the sum the energy squared in the other column. An outline of the table can be seen in the following table
 \begin{center}
@@ -224,7 +224,7 @@ The second step of the framework is the \emph{M-step}. In the M-step we update t
 
 The density class is implemented in the file \texttt{mixed/mixeddensities.cpp}. 
 
-Parameter estimation is done in the method \texttt{estimate}. The function takes the ess array from the ESS class as argument, and calculates the conditional probability density (CPD), means and variance arrays. The CPD is calculated directly from the array containing the number of discrete and the number of continuous observations. The CPD is thus an array where each row contains the probability of observing a continuous and discrete node when given a parent value. 
+Parameter estimation is done in the method \texttt{estimate}. The function takes the ess array from the ESS class as argument, and calculates the CPD, means and variance arrays. The CPD is calculated directly from the array containing the number of discrete and the number of continuous observations. The CPD is thus an array where each row contains the probability of observing a continuous and discrete node when given a parent value. 
 
 The estimated probability of observing a discrete value, $\hat{P}(Discrete)$, is calculated as shown in (\ref{eq3}) 
 
@@ -360,7 +360,6 @@ In order to test the samples drawn from the discrete part, i have exported the s
 \label{fig3}
 \end{figure}
 
-
 In order to show that the sampling is correct, we have extracted the data points generated by the first DBN. The data points consist of both discrete and continuous samples. By isolating the continuous samples, and making a histogram, we expect the histogram to resemble a Gaussian distribution, i.e. take the shape of the bell curve. 
 
 The histogram can be seen on figure \ref{fig1}. On top of the histogram, we have plotted a Gaussian probability density function with the mean and variance equal to the randomly generated. As can be seen from the figure \ref{fig1} the histogram approximates the Gaussian very well, and the conclusion must be that the samples drawn from the continuous part of the distribution is correct.
@@ -380,11 +379,29 @@ The histogram can be seen on figure \ref{fig1}. On top of the histogram, we have
 \label{sub:test_of_save_and_load}
 The saving function of the mixed node is tested in the following way. 
 
-Both \texttt{hmm\_mixed.cpp} saves intermediate results in a file called \texttt{mixed\_hmm.dbn}. We expect to be able to load this file, and thereby recreating the model. The class responsible for loading the file and recreating the model is the \texttt{dbn} class. 
+The previous test, \texttt{hmm\_mixed2.cpp}, saves intermediate results in a file called \texttt{mixed\_hmm2.dbn}. We expect to be able to load this file, and thereby recreating the model. The class responsible for loading the file and recreating the model is the \texttt{dbn} class. 
 
-In \texttt{hmm\_mixed3.cpp} a test case is created that loads the file \texttt{mixed\_hmm.dbn}, recreates the model and prints it to the screen. We expect the loaded model to be identical to the final model calculated in the \texttt{hmm\_mixed.cpp}.
+In \texttt{hmm\_mixed3.cpp} a test case is created that loads the file \texttt{mixed\_hmm2.dbn} generated by hmm\_mixed2, recreates the model and prints it to the screen. We expect the loaded model to be identical to the final model calculated in the \texttt{hmm\_mixed2.cpp} which is also shown above.
 
+The output of \texttt{hmm\_mixed3.cpp} is 
 
+\begin{verbatim}
+*** LOADED MODEL WITH PARAMETERS ***
+h1: mh0
+  Node: Discrete, size: 1 
+  1 
+
+o1: mo0
+  Node: Mixed, size: 1 2 
+  Mixed CPD: 
+  [0.47202 0.52798 ]
+
+Gaussian means: 
+  0.476937 
+Gaussian variances: 
+  0.203367   
+\end{verbatim}
+which is identical to the output in the pervious test. We can therefore conclude that the saving, and loading of the model works.
 % subsection test_of_save_and_load (end)
 
 
@@ -396,6 +413,7 @@ In \texttt{hmm\_mixed3.cpp} a test case is created that loads the file \texttt{m
 The mixed node have been run on the supplied data set, and the following output is produced
 
 The result of running the implementation on the \texttt{energy\_CO} data is
+
 \begin{verbatim}
 LL= -1.37161845971546
 h1: h1
@@ -412,7 +430,6 @@ o1: o1
   Gaussian variances: 
   0.64378 
 
-
 h2: h2
   Node: Discrete, size: 1 1 
   [1 ]  
@@ -426,8 +443,7 @@ LL= -1.44312711282496
 h1: h1
   Node: Discrete, size: 1 
   1 
-
-
+  
 o1: o1
   Node: Mixed, size: 1 2 
   Mixed CPD: 
@@ -437,8 +453,7 @@ o1: o1
   -2.0284 
   Gaussian variances: 
   0.68825 
-
-
+  
 h2: h2
   Node: Discrete, size: 1 1 
   [1 ]  
@@ -449,15 +464,15 @@ h2: h2
 
 \section{Future work} % (fold)
 \label{sec:future_work}
-The present implementation does not enable the user to specify which distributions should be part of the mixed node. Future work could involve making use of the existing distributions and using them in the mixed node. This would remove the duplicate code that is present in the current prototype of the mixed node, and make the mixed node more flexible.
+The mixed node in presented in this report can only handle 1D gaussian nodes. A really feature would be to be able to use the existing nodes as the continuous node in the mixed node. Thus future work could involve making the mixed node general, adopting an arbitrarily other node as it's continuous part. This would also remove the duplicate code to calculate the Gaussian likelihood that is present in the presented mixed node, and at the same time adding a degree of flexibility to the mixed node.
 
-Multidimensional Gaussian
+Another nice feature to have, would be to be able to handle multidimensional Gaussian distributions. This feature would be enabled with the above extension.
 % section future_work (end)
 
 
 \section{Conclusion} % (fold)
 \label{sec:conclusion}
-
+The theory behind the mixed distribution has been explained and Mocapy++ has been extending with a mixed node. The node has a discrete and continuous part, where the continuous part consist of a Gaussian distribution. The node has been used on a supplied dataset, where it is used in conjunction with hydrogen bondings. The mixed node is, in it's current state, very stationary, and several suggestions for future work has been presented, especially the possibility to make the mixed node general, giving it the posibility to adobt \emph{any} node as it's continuous part.
 % section conclusion (end)
 
 

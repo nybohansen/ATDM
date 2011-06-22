@@ -1,5 +1,5 @@
 /*
- * hmm_mixed.cpp
+ * hmm_mixed3.cpp
  *
  *  Created on: 16. jun 2011
  *      Author: Kasper Nybo Hansen

@@ -1,5 +1,5 @@
 /*
- * hmm_mixed.cpp
+ * hmm_mixed4.cpp
  *
  *  Created on: 16. jun 2011
  *      Author: Kasper Nybo Hansen
@@ -17,13 +17,15 @@ int main(void) {
 	// The dynamic Bayesian network
 	DBN dbn;
 
-	// Nodes in slice 1
-	Node* h1 = NodeFactory::new_discrete_node(1, "h1");
-	Node* o1 = NodeFactory::new_mixed_node(2, "o1");
+	uint H_SIZE=5;
+	uint O_SIZE=2;
 
+	// Nodes in slice 1
+	Node* h1 = NodeFactory::new_discrete_node(H_SIZE, "h1");
+	Node* o1 = NodeFactory::new_mixed_node(O_SIZE, "o1");
 
 	// Nodes in slice 2
-	Node* h2 = NodeFactory::new_discrete_node(1, "h2");
+	Node* h2 = NodeFactory::new_discrete_node(H_SIZE, "h2");
 
 	// Set architecture
 	dbn.set_slices(vec(h1, o1), vec(h2, o1));
