@@ -185,13 +185,13 @@ the parameters needs to be stored for each value that the parent node can take. 
 
 I have implemented the ESS class in the file \texttt{mixed/mixedess.cpp}. The class is responsible for collection data about the sample points, so they can be used later in the density class. Both tables are stored in the ESS array.
 
-The mixedess class stores two tables for later retrieval in the density class. 
+The \texttt{mixedess} class stores two tables for later retrieval in the density class. 
 
 Both tables are populated in the class method \texttt{add\_ptv}. This method takes a vector as input. The vector has the format
 \begin{equation}
   \{Parent\ value, Indicator, Energy\}
 \end{equation}
-and is called \emph{ptv}.
+and is called \texttt{ptv}.
 
 
 If $Indicator=0$ then we know that the sample is a discrete sample, otherwise it must be a continuous sample.
@@ -215,7 +215,10 @@ The second table stored in the ESS has the size parent size $\times$ node size. 
   \vdots & \vdots & \vdots \\
   $p_{n-1}$ & $\sum_{\forall e \in E_{n-1}} e$ & $\sum_{\forall e \in E_{n-1}} e^2$ \\
   \end{tabular}  
-\end{center}
+\end{center}         
+
+Note throughout this report, when otherwise not noted, the first column (The column containing the parent value) is not present in the implemented arrays, since this is stored implicit in the array data structure and can be accessed by indexing. It is solely shown in the outline tables for clarity. 
+
 %subsection ess (end)
 
 \subsection{Densities - parameter estimation} % (fold)
@@ -224,7 +227,7 @@ The second step of the framework is the \emph{M-step}. In the M-step we update t
 
 The density class is implemented in the file \texttt{mixed/mixeddensities.cpp}. 
 
-Parameter estimation is done in the method \texttt{estimate}. The function takes the ess array from the ESS class as argument, and calculates the CPD, means and variance arrays. The CPD is calculated directly from the array containing the number of discrete and the number of continuous observations. The CPD is thus an array where each row contains the probability of observing a continuous and discrete node when given a parent value. 
+Parameter estimation is done in the method \texttt{estimate}. The function takes the ess array from the ESS class as argument, and calculates the CPD, means and variance arrays. The CPD is calculated directly from the array containing the number of discrete and the number of continuous observations. The CPD is thus an array where each row contains the probability of observing a continuous and discrete node, given a parent value represented by the row index. 
 
 The estimated probability of observing a discrete value, $\hat{P}(Discrete)$, is calculated as shown in (\ref{eq3}) 
 
@@ -272,9 +275,9 @@ where $sumsquared_i$ is the sum of the squared values cumming from the ess. The 
 
 \subsection{Densities - likelihood} % (fold)
 \label{sub:densities_likelihood}
-The likelihood calculation is done in the method \texttt{get\_lik}. The method takes two variables and returns a double. The first variable is the ptv and the second variable is a boolean value indicating if the result should be logarithmic scaled.
+The likelihood calculation is done in the method \texttt{get\_lik}. The method takes two variables and returns a \texttt{double}. The first variable is the \texttt{ptv} and the second variable is a \texttt{boolean} value indicating if the result should be logarithmic scaled.
 
-Recall that the ptv is a 3-tuple consisting of the values $\{Parent\ value, Indicator, Energy\}$. As usual we define the parent value as $p_i$. Given the ptv, we wish to answer the question, `How likely is it to see this sample given the current model configuration?'. 
+Recall that the \texttt{ptv} is a 3-tuple consisting of the values $\{Parent\ value, Indicator, Energy\}$. As usual we define the parent value as $p_i$. Given the \texttt{ptv}, we wish to answer the question, `How likely is it to see this sample given the current model configuration?'. 
 
 We can answer this question in the following way.  If the indicator is $0$ we return the likelihood of seeing a discrete value. This value can be found by making a lookup in the CPD under the given parent value. 
 
@@ -287,7 +290,7 @@ If the indicator is $1$, we know we are in the continuous case. We thus calculat
 where $\hat{P}(continuous)$ can be found by making a lookup in the CPD table, and where $\mu_i$ and $\sigma_i$ can be found in the means and variances table by making a lookup under $p_i$.
 
 
-Due to limited precision, the likelihood can become $0$. This can happen when \ref{eq20} is close to $0$. If this happens and the method is called with the boolean flag set to true, an error will occur because we cannot take the logarithm of 0. To remove this problem, we test if the likelihood is calculated as zero. If it is, we set it to the constant \texttt{\_MIN\_TRANSITION}. This ensures that we always will take the logarithm of a positive number.
+Due to limited precision, the likelihood can become $0$. This can happen when (\ref{eq20}) is close to $0$. If this happens and the method is called with the boolean flag set to true, an error will occur because we cannot take the logarithm of 0. To remove this problem, we test if the likelihood is calculated as zero. If it is, we set it to the constant \texttt{\_MIN\_TRANSITION}. This ensures that we always will take the logarithm of a positive number.
 
 % subsection densities_likelihood (end)
 
@@ -313,15 +316,13 @@ We set the dimension and the number of samples to $1$. From the estimate functio
 \section{Testing of implementation} % (fold)
 \label{sec:testing_of_implementation}
 
-This section describes the testing done to ensure that the implemented mixed node works as supposed. 4 test cases 
-
-A description of some simple tests that show that the implementation is correct. 
+This section describes the testing done to ensure that the implemented mixed node works as supposed. 2 tests are performed.
 
 \subsection{Test of inference and sampling} % (fold)
 \label{sub:test_of_sampling}
-In this test we would like to confirm that the samples drawn from the mixed node corresponds to the nodes parameters.
+In this test we would like to confirm that the samples drawn from the mixed node corresponds to the nodes parameters. The test is done with a hidden node size of $1$.
 
-The test in \texttt{examples/hmm\_mixed2.cpp} creates two DBN's. The first network is initialized with randomly picked CPD, mean and variance. After initialization abunch of samples is drawn from the network. These samples is then used to train a second network. 
+The test in \texttt{examples/hmm\_mixed2.cpp} creates two DBN's. The first network is initialized with randomly picked CPD, mean and variance. After initialization, multiple samples is drawn from the network. These samples is then used to train a second network. 
 
 We expect the two networks to have almost identical parameters, i.e. we expect the second network to be able to learn the parameters of the first network that generated the sample points.
 
@@ -337,8 +338,7 @@ to0:
   0.476903 
   Gaussian variances: 
   0.20354 
-  
-  
+    
 mo0:
   Node: Mixed, size: 1 2 
   Mixed CPD: 
@@ -349,25 +349,25 @@ mo0:
   Gaussian variances: 
   0.203367 
 \end{verbatim}
-As we can see the two nodes are almost identical, which confirms that the inference is working.
+As we can see the two nodes are almost identical, which confirms that the inference is working as supposed.
 
-In order to test the samples drawn from the discrete part, i have exported the sampled data, and isolated the indicator values. From these values I have made a histogram. I expect the distribution of the indicator values drawn is close to the randomly picked CPD. The CPD in this case is $[0.476073, 0.523927]$
+In order to test the samples drawn from the discrete part, the sampled data is exported, and the indicator values is isolated. From these values a histogram is made. the expectation is that the distribution of the sampled indicator values, is close to the randomly picked CPD. The CPD in this case is $[0.476073, 0.523927]$. Figure \ref{fig3} shows the histogram of the indicator values.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=0.5\textwidth]{figures/fig3.png}                                                                             
-\caption{Histogram of the indicator values. The distribution of the two, should resemble the randomly generated PCD. The distribution of the drawn indicator values is $[0.47202,  0.52798]$, compared to the randomly picked CPD: $[0.426073, 0.573927]$. There are some discrepancies, but still acceptable.}
+\caption{Histogram of the indicator values. The distribution of the two, should resemble the randomly generated PCD. The distribution of the drawn indicator values is $[0.47202,  0.52798]$, compared to the randomly picked CPD: $[0.476073, 0.523927]$. There are some discrepancies, but still acceptable.}
 \label{fig3}
 \end{figure}
 
-In order to show that the sampling is correct, we have extracted the data points generated by the first DBN. The data points consist of both discrete and continuous samples. By isolating the continuous samples, and making a histogram, we expect the histogram to resemble a Gaussian distribution, i.e. take the shape of the bell curve. 
+In order to show that the sampling of the continuous case is correct, we have extracted the data points generated by the first DBN. The data points consist of both discrete and continuous samples. By isolating the continuous samples, and making a histogram, we expect the histogram to resemble a Gaussian distribution, i.e. take the shape of the bell curve. 
 
-The histogram can be seen on figure \ref{fig1}. On top of the histogram, we have plotted a Gaussian probability density function with the mean and variance equal to the randomly generated. As can be seen from the figure \ref{fig1} the histogram approximates the Gaussian very well, and the conclusion must be that the samples drawn from the continuous part of the distribution is correct.
+The histogram can be seen on figure \ref{fig1}. On top of the histogram, we have plotted a Gaussian probability density function with the mean and variance equal to the model parameters, i.e. $\hat{\mu} = 0.4769$ and $\sigma^2 = 0.20354$. As can be seen from figure \ref{fig1} the histogram approximates the Gaussian very well, and the conclusion must be that the samples drawn from the continuous part of the distribution is correct.
 
 \begin{figure}
 \centering
 \includegraphics[width=0.5\textwidth]{figures/fig1.png}
-\caption{Histogram of the samples drawn from the Gaussian part of the mixed distribution. Red curve is a Gaussian probability distribution with the parameters randomly drawn, i.e. $\hat{\mu} = 0.4769$ and $\sigma = 0.4509$. Note that the distribution is not normalized!}
+\caption{Histogram of the samples drawn from the Gaussian part of the mixed distribution. Red curve is a Gaussian probability distribution with the parameters randomly drawn, i.e. $\hat{\mu} = 0.4769$ and $\sigma^2 = 0.20354$. Note that the distribution is not normalized!}
 \label{fig1}
 \end{figure}
 
@@ -379,7 +379,7 @@ The histogram can be seen on figure \ref{fig1}. On top of the histogram, we have
 \label{sub:test_of_save_and_load}
 The saving function of the mixed node is tested in the following way. 
 
-The previous test, \texttt{hmm\_mixed2.cpp}, saves intermediate results in a file called \texttt{mixed\_hmm2.dbn}. We expect to be able to load this file, and thereby recreating the model. The class responsible for loading the file and recreating the model is the \texttt{dbn} class. 
+The previous test, \texttt{hmm\_mixed2.cpp}, saves intermediate model states in a file called \texttt{mixed\_hmm2.dbn}. We expect to be able to load this file, and thereby recreating the model. The class responsible for loading the file and recreating the model is the \texttt{dbn} class. 
 
 In \texttt{hmm\_mixed3.cpp} a test case is created that loads the file \texttt{mixed\_hmm2.dbn} generated by hmm\_mixed2, recreates the model and prints it to the screen. We expect the loaded model to be identical to the final model calculated in the \texttt{hmm\_mixed2.cpp} which is also shown above.
 
@@ -401,7 +401,7 @@ Gaussian means:
 Gaussian variances: 
   0.203367   
 \end{verbatim}
-which is identical to the output in the pervious test. We can therefore conclude that the saving, and loading of the model works.
+which is identical to the output in the pervious test. We can therefore conclude that the saving, and loading of the model works as supposed.
 % subsection test_of_save_and_load (end)
 
 
@@ -410,61 +410,100 @@ which is identical to the output in the pervious test. We can therefore conclude
 
 \section{Results on supplied dataset} % (fold)
 \label{sec:results}
-The mixed node have been run on the supplied data set, and the following output is produced
+A network with the mixed node has been setup, and the network has been trained on the two provided datasets. Several different parent sizes have been tested. A parent size of $1$, yields only one Gaussian distribution which doesn't fit the training data very well. A parent size of $5$ seems to cause overfitting, and some of the $5$ Gaussians have a strong overlap. A parent size of $2$ is found to yield the best results. Both test cases in the section is run with parent size $2$. The test is run with a burn in value of $10$. The network keeps running until convergence is reached. Convergence is reached when there is no improvement in the log-likelihood 30 times in a row.
 
-The result of running the implementation on the \texttt{energy\_CO} data is
+Both test can be found in the file \texttt{examples/hmm\_mixed6.cpp}. The following two subsections elaborate on the results found.
 
-\begin{verbatim}
-LL= -1.37161845971546
-h1: h1
-  Node: Discrete, size: 1 
-  1 
+\subsection{Energy\_CO dataset} % (fold)
+\label{sub:energy_co_dataset}
 
-o1: o1
-  Node: Mixed, size: 1 2 
-  Mixed CPD: 
-  [0.39864 0.60136 ]
-
-  Gaussian means: 
-  -2.0957 
-  Gaussian variances: 
-  0.64378 
-
-h2: h2
-  Node: Discrete, size: 1 1 
-  [1 ]  
-\end{verbatim}
-
-
-The result of running the implementation on the \texttt{energy\_NH} dataset is
+The result of running the implementation with the \texttt{energy\_CO} data set as input and a hidden node size equal to $2$ can be seen in the following output.
 
 \begin{verbatim}
-LL= -1.44312711282496
+LL= -1.38917580670968
 h1: h1
-  Node: Discrete, size: 1 
-  1 
-  
+  Node: Discrete, size: 2 
+  0.89847 0.10153 
+
+
 o1: o1
-  Node: Mixed, size: 1 2 
+  Node: Mixed, size: 2 2 
   Mixed CPD: 
-  [0.32025 0.67975 ]
+  [0.60764 0.39236 ]
+  [2.1166e-05 0.99998 ]
 
   Gaussian means: 
-  -2.0284 
+  -1.6738 -2.4113 
   Gaussian variances: 
-  0.68825 
-  
+  0.88943 0.22712 
+
+
 h2: h2
-  Node: Discrete, size: 1 1 
-  [1 ]  
+  Node: Discrete, size: 2 2 
+  [0.89229 0.10771 ]
+  [0.20366 0.79634 ]
 \end{verbatim}
+
+Figure \ref{fig4} illustrates the output, where the \texttt{energy\_CO} data set is plotted as a histogram, where the two gaussians produced by the DBN is superimposed onto. 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/fig4.png}
+\caption{The continuous samples from the energy\_CO dataset plotted as a histogram. The red and green lines are the 2 Gaussians found by the DBN.}
+\label{fig4}
+\end{figure}
+
+
+% subsection energy_co_dataset (end)
+
+\subsection{Energy\_NH dataset} % (fold)
+\label{sub:energy_nh_dataset}
+The result of running the implementation on the \texttt{energy\_NH} dataset yields the following output
+
+\begin{verbatim}
+LL= -1.58744875772879
+h1: h1
+  Node: Discrete, size: 2 
+  0.99643 0.0035714 
+
+o1: o1
+  Node: Mixed, size: 2 2 
+  Mixed CPD: 
+  [0.76625 0.23375 ]
+  [0.081073 0.91893 ]
+
+Gaussian means: 
+  -0.97857 -2.1716 
+  Gaussian variances: 
+  0.47761 0.54614 
+
+h2: h2
+  Node: Discrete, size: 2 2 
+  [0.70649 0.29351 ]
+  [0.15369 0.84631 ]
+\end{verbatim}
+
+A histogram of the continuous part of the dataset can be seen on figure \ref{fig5} along with two superimposed Gaussians that have the estimated $\mu$ and $\sigma^2$ from the DBN.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/fig5.png}
+\caption{The continuous samples from the energy\_NH dataset plotted as a histogram. The red and green lines are the 2 Gaussians found by the DBN.}
+\label{fig5}
+\end{figure}
+
+% subsection energy_nh_dataset (end)
+
+
+
+
 
 
 % section results (end)   
 
 \section{Future work} % (fold)
 \label{sec:future_work}
-The mixed node in presented in this report can only handle 1D gaussian nodes. A really feature would be to be able to use the existing nodes as the continuous node in the mixed node. Thus future work could involve making the mixed node general, adopting an arbitrarily other node as it's continuous part. This would also remove the duplicate code to calculate the Gaussian likelihood that is present in the presented mixed node, and at the same time adding a degree of flexibility to the mixed node.
+The mixed node presented in this report can only handle one dimensional gaussian nodes. A really neat feature, would be, to be able to use the existing nodes as the continuous node in the mixed node. Future work could involve making the mixed node general, adopting an arbitrarily other node as it's continuous part. This would also remove the duplicate code to calculate the Gaussian likelihood that is present in the presented mixed node. And at the same time add a degree of flexibility to the mixed node.
 
 Another nice feature to have, would be to be able to handle multidimensional Gaussian distributions. This feature would be enabled with the above extension.
 % section future_work (end)
@@ -472,7 +511,8 @@ Another nice feature to have, would be to be able to handle multidimensional Gau
 
 \section{Conclusion} % (fold)
 \label{sec:conclusion}
-The theory behind the mixed distribution has been explained and Mocapy++ has been extending with a mixed node. The node has a discrete and continuous part, where the continuous part consist of a Gaussian distribution. The node has been used on a supplied dataset, where it is used in conjunction with hydrogen bondings. The mixed node is, in it's current state, very stationary, and several suggestions for future work has been presented, especially the possibility to make the mixed node general, giving it the posibility to adobt \emph{any} node as it's continuous part.
+The theory behind the mixed distribution has been explained and Mocapy++ has been extending with a mixed node. The node has a discrete and continuous part, where the continuous part consist of a Gaussian distribution. The mixed node is, in it's current state, very stationary, and several suggestions for future work has been presented, especially the possibility to make the mixed node general, giving it the possibility to adopt \emph{any} node as it's continuous part. The node has been used on a supplied dataset consisting of data from hydrogen bondings. The result is that the node performs best with a parent size of $2$. 
+
 % section conclusion (end)
 
 

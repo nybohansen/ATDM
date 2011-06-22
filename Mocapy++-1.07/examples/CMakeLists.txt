@@ -60,7 +60,7 @@ SET(MOCAPYLIB MocapyDR CACHE STRING "Mocapy library used when linking executable
 ENDIF(BUILD_DUMMYRANDOM)
 
 
-SET(PROGS mdarray hmm_bippo hmm_factorial hmm_simple hmm_discrete discrete_hmm_with_prior hmm_gauss hmm_gauss_1d hmm_multinomial hmm_dirichlet hmm_poisson hmm_vonmises infenginehmm_example infenginemm_example hmm_torus hmm_kent hmm_mixed1 hmm_mixed2 hmm_mixed3 hmm_mixed4 hmm_mixed5)
+SET(PROGS mdarray hmm_bippo hmm_factorial hmm_simple hmm_discrete discrete_hmm_with_prior hmm_gauss hmm_gauss_1d hmm_multinomial hmm_dirichlet hmm_poisson hmm_vonmises infenginehmm_example infenginemm_example hmm_torus hmm_kent hmm_mixed1 hmm_mixed2 hmm_mixed3 hmm_mixed4 hmm_mixed5 hmm_mixed6)
 SET(PROGS_BOOST_OPTIONS_THREADS mlr-uni)
 
 FOREACH(p ${PROGS})

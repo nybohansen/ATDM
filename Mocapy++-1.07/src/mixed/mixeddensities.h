@@ -89,8 +89,6 @@ private:
 	Prior* prior;
 	bool init_random;
 
-    // MDArray<double> user_means;
-    // MDArray<double> user_variance;
 	MDArray<double> means;
     MDArray<double> variance;
     

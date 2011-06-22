@@ -36,7 +36,6 @@ enum MIXED_ESS_INDEX {M_D, M_CV, M_DV, M_DATALENGTH, M_ESSSIZE};
 //Enum used to define how the PTV is indexed
 //PV = Parent Value, Indicator = indicator, ENERGY = energy 
 enum PTV_INDEX {PV, INDICATOR, ENERGY};
-
 enum M_D_INDEX {DISCRETE_TYPE, CONTINUOUS_TYPE};
 enum M_CV_INDEX {SUM, SUM_SQUARED};
 

@@ -1,4 +1,4 @@
-function plot_samples(samples,mu,vars, bins, name)
+function xs = plot_samples(samples,mu, vars, bins, name, colr)
 
 n = size(samples,1);
 
@@ -12,7 +12,7 @@ xs = min(x):0.01:max(x);
 actual_gaussian = normpdf(xs,mu,vars);
 
 hold on;
-plot(xs,actual_gaussian,'r','linewidth',1);
+plot(xs,actual_gaussian,colr,'linewidth',1);
 title(name);
 xlabel('Energy','fontsize',10);
 ylabel('Density','fontsize',10);

@@ -25,7 +25,7 @@ int main(void) {
 	int MCMC_BURN_IN = 10;
 
 	// HMM hidden and observed node sizes
-	uint H_SIZE=5;
+	uint H_SIZE=2;
 	uint O_SIZE=2;
 	bool init_random=false;
 

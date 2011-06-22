@@ -57,7 +57,7 @@ int main(void) {
 		cout << "LL= " << ll ;
 		if (ll > bestLL) {
 			cout << " * saving model *" << endl;
-			dbn.save("mixed_hmm.dbn");
+			dbn.save("mixed_hmm4.dbn");
 			bestLL = ll;
 			it_no_improvement=0;
 		} else { 
