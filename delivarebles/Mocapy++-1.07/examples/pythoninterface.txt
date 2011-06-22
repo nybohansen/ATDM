@@ -1,0 +1,15 @@
+Go to www.swig.org for information on how to install and use swig on your machine.
+
+On Debian Linux, the wrapper can be build as follows:
+
+swig -python -c++ pythoninterface.i
+c++ -fPIC -c pythoninterface_wrap.cxx -I /usr/include/python2.5/
+c++ -shared -O3 -fpic -Wall -fmessage-length=0  CMakeFiles/pythoninterface.dir/pythoninterface.cpp.o  -L/home/palu/boost/lib ../libs/libMocapy.a /home/palu/boost/lib/libboost_serialization.so -llapack -lgfortran -Wl,-rpath,/home/palu/boost/lib pythoninterface_wrap.o  -o _wrapper.so
+
+
+And then in Python:
+
+import wrapper
+wrapper.makeDBN()
+wrapper.loadDBN("mydbn.dbn")
+wrapper.sample(10)

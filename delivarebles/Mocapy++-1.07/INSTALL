@@ -1,0 +1,52 @@
+Please try out building Mocapy++ using cmake. You need to install cmake, I'm using the latest binary (2.6.2) from www.cmake.org .
+Older versions seem to have problems finding the boost libraries.
+
+Quick install
+----------------------
+
+Compile Mocapy++ library and example programs:
+
+cmake .
+make
+
+
+If that does not work, please continue reading.
+
+Additional information
+-----------------------
+
+
+If there are problems finding libraries, e.g. boost, you can try to work around this
+by setting environment variables. If you have boost under a non-standard prefix, you can 
+add the prefix to CMAKE_PREFIX_PATH, e.g.:
+export CMAKE_PREFIX_PATH=/net/
+
+If you instead have boost installed as a separate package, you can set the
+environment variable BOOST_ROOT, e.g.:
+export BOOST_ROOT=/opt/boost-1_37/
+cmake then tries to find required headers and libraries in $BOOST_ROOT/include
+and $BOOST_ROOT/lib .
+
+---
+PLEASE NOTE: It is important that the boost libraries are compiled using the same compiler as you are using for Mocapy++. The filenames of the boost libraries contains the compiler name and compiler version that they were built with.
+---
+
+
+In cmake you compile in a separate directory from the source directory. This
+keeps the source directory uncluttered. If you have mocapy in e.g.
+~/src/Mocapy and decide to compile in
+~/tmp/mocapy-build, you do the following:
+
+mkdir ~/tmp/mocapy-build
+cd ~/tmp/mocapy-build
+cmake ~/src/Mocapy # this command creates Makefiles
+make
+
+You can change default settings using either cmake (command line), ccmake (text
+user interface) or cmake-gui (duh). With 
+cmake -LH .
+you can list possible basic options. For all options, use
+cmake -LAH .
+For example, in order to generate verbose Makefiles so that all compiler
+commands are visible, and with a different c++ compiler, issue:
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_CXX_COMPILER:FILEPATH=/usr/local/bin/c++ .

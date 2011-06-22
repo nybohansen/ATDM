@@ -1,0 +1,303 @@
+diff --git a/Mocapy++-1.07/examples/hmm_discrete.cpp b/Mocapy++-1.07/examples/hmm_discrete.cpp
+index d24ebe5..8155b61 100644
+--- a/Mocapy++-1.07/examples/hmm_discrete.cpp
++++ b/Mocapy++-1.07/examples/hmm_discrete.cpp
+@@ -100,12 +100,12 @@ int main(void) {
+ 
+ 	// Generate the data
+ 	double sum_LL(0);
+-	for (int i=0; i<N; i++) {
+-		pair<Sequence, double>  seq_ll = tdbn.sample_sequence(T);
+-		sum_LL += seq_ll.second;
+- 		seq_list.push_back(seq_ll.first);
+- 		mismask_list.push_back(mismask);
+-	}
++    for (int i=0; i<N; i++) {
++     pair<Sequence, double>  seq_ll = tdbn.sample_sequence(T);
++     sum_LL += seq_ll.second;
++             seq_list.push_back(seq_ll.first);
++             mismask_list.push_back(mismask);
++    }
+ 	cout << "Average LL: " << sum_LL/N << endl;
+ 
+ 	GibbsRandom mcmc = GibbsRandom(&mdbn);
+diff --git a/Mocapy++-1.07/examples/hmm_mixed.cpp b/Mocapy++-1.07/examples/hmm_mixed.cpp
+index 9272125..47576b2 100644
+--- a/Mocapy++-1.07/examples/hmm_mixed.cpp
++++ b/Mocapy++-1.07/examples/hmm_mixed.cpp
+@@ -45,8 +45,6 @@ int main(void) {
+     // em.load_sequences("data/energy_CO_verysmall.data");
+     //   
+ 
+-
+-
+     // em.load_mismask("data/mismask.dat");
+     // em.load_weights("data/weights.dat");
+     // em.load_sequences("data/traindata.dat");
+@@ -63,5 +61,9 @@ int main(void) {
+ 	cout << "o1: " << *o1 << endl;
+ 	cout << "h2: " << *h2 << endl;
+ 
++    //Call the sampler!
++    // pair<Sequence, double>  seq_ll = dbn.sample_sequence(10);
++
++
+ 	return EXIT_SUCCESS;
+ }
+diff --git a/Mocapy++-1.07/libs/libMocapy.a b/Mocapy++-1.07/libs/libMocapy.a
+index 9c53306..8c3d4b1 100644
+Binary files a/Mocapy++-1.07/libs/libMocapy.a and b/Mocapy++-1.07/libs/libMocapy.a differ
+diff --git a/Mocapy++-1.07/src/framework/emengine.cpp b/Mocapy++-1.07/src/framework/emengine.cpp
+index d967e3b..d6662d9 100644
+--- a/Mocapy++-1.07/src/framework/emengine.cpp
++++ b/Mocapy++-1.07/src/framework/emengine.cpp
+@@ -174,7 +174,7 @@ void EMEngine::do_E_step(uint mcmc_steps, uint burn_in_steps, bool init_random)
+ 			Sample s = inf_engine.sample_next();
+ 			loglik += s.ll;
+ 			slice_count += s.slice_count;
+-		}
++		}        		
+ 	}
+ 	E_done = true;
+ }
+@@ -261,7 +261,7 @@ double EMEngine::get_loglik() {
+ 		throw MocapyExceptions("E step was not performed.");
+ 	}
+ 
+-	// Return LogLik/slice count
++	// Return LogLik/slice count        
+ 	return loglik / (double) slice_count;
+ }
+ 
+diff --git a/Mocapy++-1.07/src/framework/nodefactory.cpp b/Mocapy++-1.07/src/framework/nodefactory.cpp
+index 698250a..3843dd9 100644
+--- a/Mocapy++-1.07/src/framework/nodefactory.cpp
++++ b/Mocapy++-1.07/src/framework/nodefactory.cpp
+@@ -52,7 +52,7 @@ DiscreteNode* NodeFactory::new_discrete_node(uint node_size, const char* name, b
+ 
+ MixedNode* NodeFactory::new_mixed_node(uint node_size, const char* name, bool init_random, CPD new_cpd, Node* mixed_node, bool fixed) {
+ 	MixedNode* n = new MixedNode();
+-	n->set_densities( MixedDensities(node_size, NULL, init_random ) );
++	n->set_densities( MixedDensities( init_random ) );
+ 
+ 	assert(!mixed_node || new_cpd.empty());
+ 
+diff --git a/Mocapy++-1.07/src/mixed/mixeddensities.cpp b/Mocapy++-1.07/src/mixed/mixeddensities.cpp
+index f75e528..b6fe976 100644
+--- a/Mocapy++-1.07/src/mixed/mixeddensities.cpp
++++ b/Mocapy++-1.07/src/mixed/mixeddensities.cpp
+@@ -26,28 +26,11 @@ using namespace std;
+ 
+ namespace mocapy {
+ 
+-MixedDensities::MixedDensities() {
+-    // cout << "MixedDensities::MixedDensities()" << endl;
++MixedDensities::MixedDensities(bool new_init_random) {
++    cout << "MixedDensities::MixedDensities()" << endl;
++    init_random = new_init_random;    
+ }
+ 
+-MixedDensities::MixedDensities(uint new_node_size, Prior * new_prior, bool new_init_random) {
+-    // cout << "MixedDensities(uint new_node_size, Prior * new_prior, bool new_init_random)" << endl;
+-    // node_size is the number of states of the discrete node
+-    node_size = new_node_size;
+-    prior = new_prior;
+-    init_random = new_init_random;
+-}
+-
+-MixedDensities::MixedDensities(uint new_node_size, CPD & new_user_cpd, Prior * new_prior) {
+-	// node_size is the number of states of the discrete node
+-	node_size = new_node_size;
+-	prior = new_prior;
+-	user_cpd = new_user_cpd;
+-	init_random = false;
+-}
+-
+-
+-
+ // Normalize CPD and make sure that CPD is 'well'
+ void MixedDensities::set_cpd(CPD & new_cpd) {
+     // cout << "MixedDensities::set_cpd(CPD & new_cpd)" << endl;
+@@ -57,14 +40,15 @@ void MixedDensities::set_cpd(CPD & new_cpd) {
+     cpd.normalize();
+     cpd.clip(_MIN_TRANSITION, 1000);
+     
+-    // cout << "cpd = " << cpd << endl;
++    cout << "cpd = " << cpd << endl;
+     
+     log_cpd = cpd;
+     log_cpd.log_all();
+-    
++        
+     cum_cpd = cpd;
+     cum_cpd.cumsum();
+     
++    cout << "cum_cpd = " << cum_cpd << endl;    
+     
+ }
+ 
+@@ -96,7 +80,7 @@ CPD MixedDensities::make_uniform_cpd(const vector<uint> & shape) {
+ 
+ // Called in node.construct, and initializes the density arrays
+ void MixedDensities::construct(vector<uint> & parent_sizes) {
+-    // cout << "MixedDensities::construct(vector<uint> & parent_sizes)" << endl;
++    cout << "MixedDensities::construct(vector<uint> & parent_sizes)" << endl;
+ 
+     //Save the parrent size, we need it later
+     parent_size = parent_sizes[0];
+@@ -105,7 +89,7 @@ void MixedDensities::construct(vector<uint> & parent_sizes) {
+     means.set_shape(parent_size);
+     variance.set_shape(parent_size);
+ 
+-
++    
+     means.randomize(randomGen);
+     variance.randomize(randomGen);    
+             
+@@ -113,26 +97,23 @@ void MixedDensities::construct(vector<uint> & parent_sizes) {
+     output_size = 2;     
+     
+     CPD_shape = vec_conc(parent_sizes, output_size); 
+-    // cout << "CPD_shape = " << CPD_shape << endl;
++    cout << "CPD_shape = " << CPD_shape << endl;
+ 
+-    if(user_cpd.empty()) {
+-        CPD cpd;
+-        if(!init_random) {
+-            cpd = make_uniform_cpd(CPD_shape);
+-        }
+-        else {
+-            cpd = make_random_cpd(CPD_shape, true);
+-        }
+-        set_cpd(cpd);
+-    } else {
+-        assert(user_cpd.get_shape() == CPD_shape);
+-        set_cpd(user_cpd);
++
++    CPD cpd;
++    if(!init_random) {
++        cpd = make_uniform_cpd(CPD_shape);
++    }
++    else {
++        cpd = make_random_cpd(CPD_shape, true);
+     }
++    set_cpd(cpd);
++
+ }
+ 
+ // Parameter estimation based on the ESS
+ void MixedDensities::estimate(vector<MDArray<double> > & ess) {
+-    // cout << "MixedDensities::estimate(vector<MDArray<double> > & ess)" << endl;
++    cout << "MixedDensities::estimate(vector<MDArray<double> > & ess)" << endl;
+     assert(!ess.empty());
+ 
+     for(uint i = 0; i < parent_size; i++){
+@@ -163,6 +144,17 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
+     cout << "MixedDensities::sample(vector<double> & pv)" << endl;
+     
+     //Draw random number in [0,1], see if above threshold. If it is, then sample from gauss, otherwise samplediscrete   
++
++
++    // //Draw sample from the gaussian distribution with estimated mean and variance
++    // uint dim = 1;
++    // double* mean = new double[dim];
++    // double *var = new double[dim];
++    // mean[0] = means[0];
++    // var[0] = variance[0];    
++    // double* s = normal_multivariate(1, 1, var, mean, &(randomGen->moc_seed2));
++    // cout << mean[0] << "," << var[0] << "," << s[0] << endl;
++    
+     
+     MDArray<double>* cumulative;
+     if (pv.empty())
+@@ -183,33 +175,8 @@ vector<double> MixedDensities::sample(vector<double> & pv) {
+ 
+ // Return likelihood, that is: P(child|parents)
+ double MixedDensities::get_lik(vector<double> & ptv, bool log_space) {  
+-    // cout << "MixedDensities::get_lik called with: " << ptv << " and log = " << log_space << endl;
+-
+-    uint dim = 1;
+-    double* mean = new double[dim];
+-    double *cov = new double[dim * dim];
+-
+-    for (uint i = 0; i < dim; i++) {
+-        mean[i] = means[i];
+-        for (uint j = 0; j < dim; j++) {
+-	        cov[i] = variance[i];
+-        }
+-    }
+-    // Must point to an int
+-    double* s = normal_multivariate(1, 1, cov, mean, &(randomGen->moc_seed2));
+-    cout << mean[0] << "," << cov[0] << "," << s[0] << endl;
+-    // vector<uint> sh = m.get_shape();
+-    // MDArray<double> sa(sh);
+-    // for (uint i = 0; i < dim; i++) {
+-    //   sa.set(i, s[i]);
+-    // }
+-
+-
+-
++    cout << "MixedDensities::get_lik called with: " << ptv << " and log = " << log_space << endl;
+ 
+-    // double *normal_multivariate(int dim_num, int n, double r[], double mu[],
+-    // double* s = normal_multivariate(1, 1, variance1, mean1, 0); 
+-    // cout << *s << endl;
+ 
+     if(ptv[INDICATOR]){
+         
+@@ -259,15 +226,8 @@ vector<MDArray<double> > MixedDensities::get_parameters() {
+    return ret;
+ }
+ 
+-
+ void MixedDensities::set_user_cpd(CPD & new_user_cpd) {
+-    // cout << "MixedDensities::set_user_cpd(CPD & new_user_cpd)" << endl;
+-    user_cpd = new_user_cpd;
+-}
+-
+-void MixedDensities::set_prior(Prior * new_prior) {
+-    // cout << "MixedDensities::set_prior(Prior * new_prior)" << endl;
+-    prior = new_prior;
++	user_cpd = new_user_cpd;
+ }
+ 
+ //Override operator <<
+diff --git a/Mocapy++-1.07/src/mixed/mixeddensities.h b/Mocapy++-1.07/src/mixed/mixeddensities.h
+index c1aa960..2abae6e 100644
+--- a/Mocapy++-1.07/src/mixed/mixeddensities.h
++++ b/Mocapy++-1.07/src/mixed/mixeddensities.h
+@@ -36,9 +36,8 @@ std::ostream& operator<<(std::ostream&, const MixedDensities&);
+ 
+ class MixedDensities : public DensitiesBase {
+ public:
+-	MixedDensities();
+-	MixedDensities(uint new_node_size, Prior * new_prior=NULL, bool new_init_random = false);
+-	MixedDensities(uint new_node_size, CPD & new_user_cpd, Prior * new_prior=NULL);
++	MixedDensities(bool new_init_random = false);
++
+ 	virtual ~MixedDensities() {};
+ 
+ 	// Initializes the Density arrays
+@@ -57,7 +56,7 @@ public:
+ 	std::vector< MDArray<double> > get_parameters();
+ 
+ 	void set_user_cpd(CPD & userCPD);
+-	void set_prior(Prior * new_prior);
++
+ 	CPD & getCPD() {return cpd;}
+ 
+ 	// Persistence
+diff --git a/report/report.tex b/report/report.tex
+index ca50ee1..cc66292 100644
+--- a/report/report.tex
++++ b/report/report.tex
+@@ -55,6 +55,9 @@ http://www.freemathhelp.com/forum/viewtopic.php?f=12&t=34692
+ Good explanation
+ http://www.ds.unifi.it/VL/VL_EN/dist/dist3.html
+ 
++
++How do sampling works, gaussian and discrete. Taking advantage of cumulative sum when doing discrete
++
+ \subsection{Subsection Heading Here}
+ Subsection text here.
+ 

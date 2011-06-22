@@ -1,0 +1,76 @@
+2010-04-06  Wouter Boomsma  <wb@binf>
+
+	* src/vonmises2d/vonmises2ddensities.* (VonMises2dDensities::setRandomGen)
+	  Added. This method overrides the default setRandomGen in DensitiesBase,
+	  calling setRandomGen in all dist_list components.
+
+	* src/vonmises2d/vonmises2d.* (VM2CosMarginalSampler::setRandomGen) Added.
+
+	* src/vonmises2d/vonmises2d.* (VonMises2d::setRandomGen) Added.
+
+	* src/vonmises2d/vonmises2d.* (VM1CosMixtureDensity::setRandomGen) Added.
+
+	* src/vonmises2d/vonmises2d.* (VM2cosDensity::setRandomGen) Added.
+
+2010-01-25  Wouter Boomsma  <wb@binf>
+
+	* src/inference/infenginehmm.cpp (SampleInfEngineHMM::SampleInfEngineHMM)
+	  Removed "Setting randomgen" debug output.
+
+2010-01-25  Wouter Boomsma  <wb@binf>
+
+	* src/Makefile.am Fixed autoconf/automake support.
+
+	* examples/Makefile.am Fixed autoconf/automake support.
+
+2009-11-13  Wouter Boomsma  <wb@binf>
+
+	* src/inference/detail/forwardbacktracker.cpp (ForwardBacktracker::forward_pass) 
+	  Added check for NAN values after normalizing forward matrix. Sets column to
+	  uniform if NAN occurs.
+
+2009-11-10  Wouter Boomsma  <wb@binf>
+
+	* src/inference/fwbtrandom.h/cpp Added. The FwbtRandom class is an alternative
+	  to the standard GibbsRandom class which makes it possible to do E-steps using
+	  forward-backtrack sampling rather than Gibbs sampling.
+
+2009-10-30  Wouter Boomsma  <wb@binf>
+
+	* src/discrete/discretedensities.* (make_uniform_cpd) Made reference argument const
+
+	* src/vonmises2d/vonmises2d.cpp (logLikelihood_neg_opt::parameterStartValues) Added
+	  code to ensure that start values produced by Moment Estimation fulfill the 
+	  necessary constraints on the k3 parameter.
+
+	* src/vonmises2d/vonmises2d.cpp (logLikelihood_neg_opt::reparameterization) Changed 
+	  reparameterization used when optimizing maximum likelihood.
+
+	* src/vonmises2d/vonmises2ddensities.cpp (VonMises2dDensities::estimate)  Set 
+	  default vonmises2d estimator to Maximum Likelihood
+
+	* src/utils/optimize.h (Brent::compute) Removed error output.
+
+	* src/utils/netlib/integrate.cpp (integrateQuad) Added error check.
+
+	* src/framework/emengine.cpp (EMEngine::initialize) Changed & to &&.
+
+2009-08-03  Wouter Boomsma  <wb@binf>
+
+	* src/utils/utils.cpp (data_loader) Fixed memory bug (delete -> delete[])
+
+2009-07-31  Wouter Boomsma  <wb@binf>
+
+	* src/gaussian/multigauss.cpp (MultiGauss::MultiGauss) Fixed bug in 1D Gaussian code.
+
+2009-07-30  Martin Paluszewski
+	* Added ChangeLog file
+	* Small changes to get rid of GCC 4.3 warnings
+
+2009-07-29  Wouter Boomsma
+
+	* Added #include <cstring> to src/utils/random_data.cpp and src/utils/utils.cpp
+
+	
+2009-07-14  Martin Paluszewski
+	* Mocapy++ version 1.00 released
